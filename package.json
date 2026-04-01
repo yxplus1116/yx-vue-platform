@@ -1,0 +1,12 @@
+{
+  "name": "exam-center-platform",
+  "private": true,
+  "packageManager": "pnpm@10.28.2",
+  "scripts": {
+    "install:all": "pnpm install",
+    "dev:admin": "pnpm --dir web-admin dev",
+    "dev:portal": "pnpm --dir web-portal dev",
+    "build:admin": "pnpm --dir web-admin build",
+    "build:portal": "pnpm --dir web-portal build"
+  }
+}

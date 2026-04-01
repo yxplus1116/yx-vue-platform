@@ -1,0 +1,9 @@
+.DS_Store
+node_modules
+.pnpm-store
+dist
+.turbo
+coverage
+*.log
+.env.local
+.env.*.local
