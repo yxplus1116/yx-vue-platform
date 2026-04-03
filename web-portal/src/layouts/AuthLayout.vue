@@ -2,15 +2,15 @@
   <div class="auth-layout">
     <div class="auth-layout__brand">
       <div class="auth-layout__brand-content">
-        <a-tag color="arcoblue" size="large">PC Portal</a-tag>
-        <h1>为门户端预留清晰、稳定的认证入口</h1>
+        <a-tag color="arcoblue" size="large">考点平台</a-tag>
+        <h1>聚合全国考点资源，为考试项目提供高效对接入口</h1>
         <p>
-          登录、注册、找回密码等认证流程都可以继续挂在这套布局下，
-          与门户业务页保持解耦。
+          登录后可查看优质考点、浏览考点详情、获取联系方式与地图位置，
+          为考试组织、考点合作与业务拓展提供统一平台入口。
         </p>
         <a-space wrap size="large">
           <a-button type="primary" @click="$router.push('/')">返回首页</a-button>
-          <a-button @click="$router.push('/business')">查看业务中心</a-button>
+          <!-- <a-button @click="$router.push('/business')">查看考点业务</a-button> -->
         </a-space>
       </div>
     </div>
@@ -21,7 +21,7 @@
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="less">
 .auth-layout {
   min-height: 100vh;
   display: grid;
@@ -80,6 +80,27 @@
 
   .auth-layout__panel {
     padding: 12px 16px 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-layout__brand {
+    padding: 24px 16px 8px;
+  }
+
+  .auth-layout__brand-content h1 {
+    margin: 16px 0 12px;
+    font-size: 28px;
+  }
+
+  .auth-layout__brand-content p {
+    margin-bottom: 20px;
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  .auth-layout__panel {
+    padding: 10px 10px 20px;
   }
 }
 </style>

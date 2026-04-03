@@ -1,88 +1,89 @@
+<script setup lang="ts">
+import { computed, onMounted, ref } from 'vue'
+import {
+  createDefaultVenueFilters,
+  getVenueList,
+  venueCategoryItems,
+  venueFilterGroups,
+  type VenueCategoryItem,
+  type VenueItem,
+} from '@/api'
+import HomeCategorySection from './modules/HomeCategorySection.vue'
+import HomeFilterBar from './modules/HomeFilterBar.vue'
+import HomeHeroSection from './modules/HomeHeroSection.vue'
+import HomeRecommendSection from './modules/HomeRecommendSection.vue'
+import type { FilterItem } from './modules/HomeFilterBar.vue'
+
+/** 首页分类卡片数据。 */
+const categoryItems = venueCategoryItems as VenueCategoryItem[]
+/** 首页筛选项配置。 */
+const filterGroups = venueFilterGroups as FilterItem[]
+/** 当前已选择的筛选条件。 */
+const selectedFilters = ref<Record<string, string>>(createDefaultVenueFilters())
+/** 当前首页推荐考点列表。 */
+const recommendItems = ref<VenueItem[]>([])
+/** 当前列表加载状态。 */
+const loading = ref(false)
+
+/** 统一给推荐区组件提供列表数据。 */
+const filteredRecommendItems = computed(() => recommendItems.value)
+
+/** 根据筛选条件加载考点列表。 */
+async function loadVenueList() {
+  loading.value = true
+
+  try {
+    const response = await getVenueList(selectedFilters.value)
+    recommendItems.value = response.data.list
+  } finally {
+    loading.value = false
+  }
+}
+
+/** 接收筛选变更并刷新列表。 */
+async function handleFilterChange(values: Record<string, string>) {
+  selectedFilters.value = values
+  await loadVenueList()
+}
+
+/** 页面首次进入时加载默认考点列表。 */
+onMounted(() => {
+  loadVenueList()
+})
+</script>
+
 <template>
-  <div class="page-shell home-page">
-    <section class="section-card home-hero">
-      <div class="home-hero__content">
-        <a-tag color="green" size="large">门户首页</a-tag>
-        <h1 class="page-title">统一头部、统一底部、统一内容承载区已经就位</h1>
-        <p class="page-subtitle">
-          这套布局适合继续承接公告、服务入口、活动专题、个人中心入口和业务导航。
-          路由结构已经拆成门户主布局与认证布局，后续扩展页面不会互相污染。
-        </p>
-        <a-space wrap size="large">
-          <a-button type="primary" size="large" @click="$router.push('/business')">进入业务中心</a-button>
-          <a-button size="large" @click="$router.push('/auth/login')">前往登录</a-button>
-        </a-space>
-      </div>
+  <div class="home-page">
+    <HomeHeroSection>
+      <HomeCategorySection :items="categoryItems" />
+    </HomeHeroSection>
 
-      <a-card class="home-hero__meta" :bordered="false">
-        <a-statistic title="共享布局" :value="2" suffix="套" />
-        <a-divider />
-        <a-statistic title="初始化路由" :value="6" suffix="个" />
-        <a-divider />
-        <a-alert type="info" show-icon>后续增加业务页时，只需要挂到对应 layout 的 children 下。</a-alert>
-      </a-card>
-    </section>
-
-    <section class="home-grid">
-      <a-card class="section-card" title="推荐信息架构" :bordered="false">
-        <a-space direction="vertical" fill size="large">
-          <a-alert type="success" show-icon>首页聚合公告、办事入口、常用服务、精选业务。</a-alert>
-          <a-alert type="warning" show-icon>认证相关页面从主门户抽离，避免头部导航和表单交叉干扰。</a-alert>
-          <a-alert type="info" show-icon>业务中心适合再细分二级路由，例如报名、缴费、成绩、证书。</a-alert>
-        </a-space>
-      </a-card>
-
-      <a-card class="section-card" title="下一阶段建议" :bordered="false">
-        <a-timeline>
-          <a-timeline-item>接入登录态与路由守卫</a-timeline-item>
-          <a-timeline-item>补齐业务模块二级路由</a-timeline-item>
-          <a-timeline-item>对接真实接口与菜单配置</a-timeline-item>
-        </a-timeline>
-      </a-card>
-    </section>
+    <div class="page-shell home-page__body">
+      <HomeFilterBar :items="filterGroups" @change="handleFilterChange" />
+      <HomeRecommendSection :items="filteredRecommendItems" :loading="loading" />
+    </div>
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="less">
 .home-page {
   display: flex;
   flex-direction: column;
-  gap: 24px;
 }
 
-.home-hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1.2fr) 360px;
-  gap: 24px;
-  padding: 32px;
-}
-
-.home-hero__content {
+.home-page__body {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 28px;
+  padding-top: 18px;
+  padding-bottom: 40px;
 }
 
-.home-hero__meta {
-  align-self: stretch;
-  border-radius: 24px;
-  background: linear-gradient(180deg, rgba(243, 248, 255, 0.95), rgba(255, 255, 255, 0.92));
-}
-
-.home-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 24px;
-}
-
-@media (max-width: 960px) {
-  .home-hero,
-  .home-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .home-hero {
-    padding: 24px;
+@media (max-width: 768px) {
+  .home-page__body {
+    gap: 20px;
+    padding-top: 14px;
+    padding-bottom: 28px;
   }
 }
 </style>

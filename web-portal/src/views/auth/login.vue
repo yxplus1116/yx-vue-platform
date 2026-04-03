@@ -1,76 +1,144 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import { useRoute, useRouter } from 'vue-router'
+import { getImageCaptcha } from '@/api'
 import { login } from '@/modules/auth'
+
+interface CaptchaState {
+  uuid: string
+  image: string
+  enabled: boolean
+}
 
 const router = useRouter()
 const route = useRoute()
 
 const loading = ref(false)
-// 登录表单先走本地状态，后续接接口时可以直接映射为请求参数。
+const captchaLoading = ref(false)
+const tenantCode = ref('')
+const captcha = reactive<CaptchaState>({
+  uuid: '',
+  image: '',
+  enabled: true,
+})
 const form = reactive({
-  account: '',
+  username: '',
   password: '',
+  captcha: '',
   remember: true,
 })
 
+function normalizeCaptchaImage(value: string) {
+  if (!value) {
+    return ''
+  }
+
+  if (value.startsWith('data:image')) {
+    return value
+  }
+
+  return `data:image/png;base64,${value}`
+}
+
+async function refreshCaptcha() {
+  captchaLoading.value = true
+
+  try {
+    const response = await getImageCaptcha()
+    captcha.uuid = response.data.uuid
+    captcha.enabled = response.data.isEnabled
+    captcha.image = normalizeCaptchaImage(response.data.img)
+
+    if (!response.data.isEnabled) {
+      form.captcha = ''
+    }
+  } finally {
+    captchaLoading.value = false
+  }
+}
+
 async function handleLogin() {
-  // 当前只做最基础校验，避免空值直接提交。
-  if (!form.account || !form.password) {
+  if (!form.username || !form.password) {
     Message.warning('请输入账号和密码')
+    return
+  }
+
+  if (captcha.enabled && !form.captcha) {
+    Message.warning('请输入验证码')
     return
   }
 
   loading.value = true
 
   try {
-    // 本地先完成登录态闭环，后续可替换为真实登录接口。
-    login({ account: form.account }, form.remember)
+    await login({
+      username: form.username,
+      password: form.password,
+      captcha: form.captcha,
+      uuid: captcha.uuid,
+    }, form.remember, tenantCode.value || undefined)
+
     Message.success('登录成功')
-    // 优先回跳到守卫带过来的目标页。
-    const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/business'
+    const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/'
     await router.push(redirect)
+  } catch {
+    if (captcha.enabled) {
+      form.captcha = ''
+      await refreshCaptcha()
+    }
   } finally {
     loading.value = false
   }
 }
+
+function handleForgotPassword() {
+  Message.info('找回密码页面待接入')
+}
+
+onMounted(() => {
+  refreshCaptcha()
+})
 </script>
 
 <template>
   <a-card class="auth-card" :bordered="false">
     <template #title>
       <div class="auth-card__title">
-        <!-- 卡片头部承担身份入口说明和品牌提示，保持登录页识别度。 -->
         <div class="auth-card__title-copy">
-          <div class="auth-card__eyebrow">
-            <a-tag size="small" color="arcoblue">Account Access</a-tag>
-            <span>统一身份入口</span>
-          </div>
-          <div class="auth-card__headline">
-            <h2>登录门户</h2>
-            <p>进入报名、缴费、成绩与证书等业务前，请先完成身份验证。</p>
-          </div>
-          <div class="auth-card__feature">
-            <span>统一后端</span>
-            <span>门户认证</span>
-            <span>业务联动</span>
-          </div>
+          <h2>登录账号</h2>
+          <p>门户端已对齐后台统一认证中心，请使用同一套账号体系登录。</p>
         </div>
       </div>
     </template>
 
-    <!-- 表单按钮保持纵向满宽，移动端和桌面端体验一致。 -->
     <a-form :model="form" layout="vertical" size="large">
-      <a-form-item field="account" label="账号">
-        <a-input v-model="form.account" placeholder="请输入手机号 / 用户名" allow-clear />
+      <a-form-item field="tenantCode" label="租户编码">
+        <a-input v-model="tenantCode" placeholder="多租户场景可填写租户编码，单租户可留空" allow-clear />
+      </a-form-item>
+      <a-form-item field="username" label="账号">
+        <a-input v-model="form.username" placeholder="请输入手机号 / 用户名" allow-clear />
       </a-form-item>
       <a-form-item field="password" label="密码">
         <a-input-password v-model="form.password" placeholder="请输入密码" allow-clear />
       </a-form-item>
+      <a-form-item v-if="captcha.enabled" field="captcha" label="验证码">
+        <div class="auth-card__captcha">
+          <a-input v-model="form.captcha" placeholder="请输入验证码" allow-clear />
+          <button
+            class="auth-card__captcha-trigger"
+            type="button"
+            :disabled="captchaLoading"
+            @click="refreshCaptcha"
+          >
+            <img v-if="captcha.image" :src="captcha.image" alt="验证码" />
+            <span v-else>{{ captchaLoading ? '加载中...' : '点击刷新' }}</span>
+          </button>
+        </div>
+      </a-form-item>
       <div class="auth-card__meta">
         <a-checkbox v-model="form.remember">记住我</a-checkbox>
-        <RouterLink class="auth-card__link" to="/auth/register">忘记密码？</RouterLink>
+        <a-button type="text" class="auth-card__link-button" @click="handleForgotPassword">忘记密码？</a-button>
       </div>
       <a-form-item class="auth-card__actions">
         <a-button type="primary" long class="auth-card__submit" :loading="loading" @click="handleLogin">
@@ -81,12 +149,12 @@ async function handleLogin() {
     </a-form>
 
     <div class="auth-card__tips">
-      <span>登录即表示你同意平台服务协议与隐私政策</span>
+      <span>登录即表示你同意全国考点平台服务协议与隐私政策</span>
     </div>
   </a-card>
 </template>
 
-<style scoped>
+<style scoped lang="less">
 .auth-card {
   width: min(100%, 420px);
   border-radius: 18px;
@@ -94,42 +162,18 @@ async function handleLogin() {
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(246, 250, 255, 0.94));
   box-shadow: 0 18px 40px rgba(15, 23, 42, 0.1);
+
+  :deep(.arco-card-header) {
+    height: auto;
+    min-height: unset;
+    align-items: flex-start;
+  }
 }
 
 .auth-card__title-copy {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-}
-
-.auth-card__eyebrow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  color: #829ab1;
-  font-size: 12px;
-}
-
-.auth-card__headline {
-  padding: 14px 16px;
-  border: 1px solid rgba(15, 98, 254, 0.08);
-  border-radius: 14px;
-  background: linear-gradient(135deg, rgba(15, 98, 254, 0.08), rgba(25, 169, 116, 0.05));
-}
-
-.auth-card__feature {
-  display: flex;
-  flex-wrap: wrap;
   gap: 8px;
-}
-
-.auth-card__feature span {
-  padding: 5px 10px;
-  border-radius: 999px;
-  background: rgba(15, 35, 95, 0.06);
-  color: #486581;
-  font-size: 12px;
 }
 
 .auth-card__title h2 {
@@ -145,6 +189,42 @@ async function handleLogin() {
   font-size: 14px;
 }
 
+.auth-card__captcha {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 124px;
+  gap: 12px;
+  width: 100%;
+}
+
+.auth-card__captcha-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 0;
+  border: 1px solid rgba(15, 35, 95, 0.12);
+  border-radius: 10px;
+  background: #fff;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+
+  img {
+    display: block;
+    width: 100%;
+    height: 40px;
+    object-fit: cover;
+  }
+
+  span {
+    color: #6b7c93;
+    font-size: 12px;
+  }
+}
+
 .auth-card__meta {
   display: flex;
   align-items: center;
@@ -154,7 +234,8 @@ async function handleLogin() {
   font-size: 13px;
 }
 
-.auth-card__link {
+.auth-card__link-button {
+  padding: 0;
   color: #0f62fe;
 }
 
@@ -180,5 +261,35 @@ async function handleLogin() {
   color: #97a6ba;
   font-size: 12px;
   line-height: 1.6;
+}
+
+@media (max-width: 480px) {
+  .auth-card {
+    width: 100%;
+    border-radius: 14px;
+  }
+
+  .auth-card__title h2 {
+    font-size: 22px;
+  }
+
+  .auth-card__title p {
+    font-size: 13px;
+  }
+
+  .auth-card__captcha {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-card__meta {
+    align-items: flex-start;
+    gap: 8px;
+    flex-direction: column;
+  }
+
+  .auth-card__submit,
+  .auth-card__ghost {
+    height: 40px;
+  }
 }
 </style>

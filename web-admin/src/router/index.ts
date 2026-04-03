@@ -1,20 +1,34 @@
-import type { App } from 'vue'
-import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
-import { setupRouterGuard } from '@/router/guard/index'
-import { basicRoutes } from './routes'
+import { createRouter, createWebHistory } from 'vue-router'
+import { useRouteStore } from '@/stores'
+import { constantRoutes, systemRoutes } from '@/router/route'
+import { setupPageGuard, setupRouterGuard } from '@/router/guard'
 
 const router = createRouter({
-  // 创建 WebHistory
-  history: createWebHistory(import.meta.env.VITE_PUBLIC_PATH),
-  // 应该添加到路由的初始路由列表
-  routes: basicRoutes as unknown as RouteRecordRaw[],
-  // 是否应该禁止尾部斜杠。默认为假
-  strict: true,
+  history: createWebHistory(import.meta.env.BASE_URL),
+  routes: [...constantRoutes, ...systemRoutes],
+  scrollBehavior: () => ({ left: 0, top: 0 }),
 })
-export default router
 
-// config router
-export function setupRouter(app: App<Element>) {
-  app.use(router)
-  setupRouterGuard(router)
+setupRouterGuard(router)
+setupPageGuard(router)
+
+/**
+ * @description 重置路由
+ * @description 注意：所有动态路由路由必须带有 name 属性，否则可能会不能完全重置干净
+ */
+export function resetRouter() {
+  try {
+    const routeStore = useRouteStore()
+    routeStore.asyncRoutes.forEach((route) => {
+      const { name } = route
+      if (name) {
+        router.hasRoute(name) && router.removeRoute(name)
+      }
+    })
+  } catch (error) {
+    // 强制刷新浏览器也行，只是交互体验不是很好
+    window.location.reload()
+  }
 }
+
+export default router

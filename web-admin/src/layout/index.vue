@@ -1,44 +1,36 @@
+<!--
+  @file Layout 组件
+  @description 布局根组件，支持默认布局、混合布局和顶部布局三种模式
+-->
 <template>
-  <a-layout class="layout">
-    <LayoutSider v-if="getShowSider" />
-    <a-layout :class="`${prefixCls}-main`">
-      <LayoutHeader v-if="getShowHeader" />
-      <Tabs v-if="getShowMultipleTab" />
-      <LayoutContent />
-    </a-layout>
-  </a-layout>
+  <component :is="currentLayout" />
 </template>
 
-<script lang="ts" setup>
-import { useHeaderSetting, useMultipleTabSetting, useSiderSetting } from '@/hooks/setting'
-import LayoutContent from './content/index.vue'
-import LayoutHeader from './header/index.vue'
-import LayoutSider from './sider/index.vue'
-import Tabs from './tabs/index.vue'
+<script setup lang="ts">
+import { useAppStore } from '@/stores'
 
-const { getShowSider } = useSiderSetting()
-const { getShowHeader } = useHeaderSetting()
-const { getShowMultipleTab } = useMultipleTabSetting()
+/** 组件名称 */
+defineOptions({ name: 'Layout' })
+const LayoutDefault = defineAsyncComponent(() => import('./LayoutDefault.vue'))
+const LayoutColumns = defineAsyncComponent(() => import('./LayoutColumns.vue'))
+const LayoutMix = defineAsyncComponent(() => import('./LayoutMix.vue'))
+const LayoutTop = defineAsyncComponent(() => import('./LayoutTop.vue'))
 
-const prefixCls = 'layout'
+/** 状态管理 */
+const appStore = useAppStore()
+
+/** 布局组件映射 */
+const layoutMap = {
+  mix: LayoutMix,
+  top: LayoutTop,
+  default: LayoutDefault,
+  columns: LayoutColumns,
+} as const
+
+/** 当前布局组件 */
+const currentLayout = computed(() =>
+  layoutMap[appStore.layout as keyof typeof layoutMap] || layoutMap.default,
+)
 </script>
-<style lang="less" scope>
-  .layout {
-    display: flex;
 
-    /* width: calc(100% - 1px); */
-    width: 100%;
-    min-height: 100%;
-    background-color: @content-bg;
-    flex-direction: column;
-
-    > .ant-layout {
-      min-height: 100%;
-    }
-
-    &-main {
-      width: 100%;
-      height: 100vh;
-    }
-  }
-</style>
+<style lang="scss" scoped></style>

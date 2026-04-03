@@ -11,27 +11,26 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    AAlert: typeof import('@arco-design/web-vue')['Alert']
     AButton: typeof import('@arco-design/web-vue')['Button']
     ACard: typeof import('@arco-design/web-vue')['Card']
     ACheckbox: typeof import('@arco-design/web-vue')['Checkbox']
     ACol: typeof import('@arco-design/web-vue')['Col']
-    ADivider: typeof import('@arco-design/web-vue')['Divider']
+    ADoption: typeof import('@arco-design/web-vue')['Doption']
+    ADropdown: typeof import('@arco-design/web-vue')['Dropdown']
     AForm: typeof import('@arco-design/web-vue')['Form']
     AFormItem: typeof import('@arco-design/web-vue')['FormItem']
     AInput: typeof import('@arco-design/web-vue')['Input']
     AInputPassword: typeof import('@arco-design/web-vue')['InputPassword']
+    APagination: typeof import('@arco-design/web-vue')['Pagination']
     AppFooter: typeof import('./components/layout/AppFooter.vue')['default']
     AppHeader: typeof import('./components/layout/AppHeader.vue')['default']
     AResult: typeof import('@arco-design/web-vue')['Result']
     ARow: typeof import('@arco-design/web-vue')['Row']
     ASpace: typeof import('@arco-design/web-vue')['Space']
-    AStatistic: typeof import('@arco-design/web-vue')['Statistic']
     ATag: typeof import('@arco-design/web-vue')['Tag']
-    ATimeline: typeof import('@arco-design/web-vue')['Timeline']
-    ATimelineItem: typeof import('@arco-design/web-vue')['TimelineItem']
     HelloWorld: typeof import('./components/HelloWorld.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    VenueMap: typeof import('./components/map/VenueMap.vue')['default']
   }
 }

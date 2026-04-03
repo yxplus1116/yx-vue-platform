@@ -35,7 +35,7 @@
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="less">
 .business-page {
   display: flex;
   flex-direction: column;
@@ -52,5 +52,22 @@
   height: 100%;
   border-radius: 22px;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(244, 248, 255, 0.92));
+}
+
+@media (max-width: 768px) {
+  .business-hero {
+    gap: 18px;
+    padding: 18px;
+  }
+
+  .business-card {
+    border-radius: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .business-hero {
+    padding: 16px;
+  }
 }
 </style>

@@ -1,92 +1,162 @@
-import axios, { AxiosError, type AxiosRequestConfig } from 'axios'
+import axios, { AxiosError, type AxiosRequestConfig, type AxiosResponse, type InternalAxiosRequestConfig } from 'axios'
 import { Message } from '@arco-design/web-vue'
 import '@arco-design/web-vue/es/message/style/css.js'
+import { clearAuthState, getTenantId, getToken } from '@/modules/auth'
 import type { ApiResponse, RequestConfig } from './types'
 
-const SUCCESS_CODE = 0
-const TIMEOUT_CODE = 401
-const API_PREFIX = import.meta.env.VITE_API_BASE_PREFIX || '/api'
-const TOKEN_KEY = import.meta.env.VITE_TOKEN_STORAGE_KEY || 'token'
-
-function getStoredToken() {
-  // 请求层统一从两个存储位置兜底读取 token。
-  return localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY)
+/** axios 配置与业务扩展配置的组合类型。 */
+type RequestOptions = AxiosRequestConfig & {
+  /** 业务层附加的自定义请求配置。 */
+  requestConfig?: RequestConfig
 }
 
-// 与 web-admin 保持统一的基础约定：
-// /api 前缀、Bearer token、code=0 视为成功。
+/** 常见 HTTP 状态码提示文案。 */
+const StatusCodeMessage: Record<number, string> = {
+  400: '请求错误(400)',
+  401: '未授权，请重新登录(401)',
+  403: '拒绝访问(403)',
+  404: '请求出错(404)',
+  408: '请求超时(408)',
+  500: '服务器错误(500)',
+  501: '服务未实现(501)',
+  502: '网络错误(502)',
+  503: '服务不可用(503)',
+  504: '网络超时(504)',
+}
+
+/** 门户端统一 axios 实例。 */
 const service = axios.create({
-  baseURL: API_PREFIX,
-  timeout: 10_000,
+  baseURL: import.meta.env.VITE_API_PREFIX ?? import.meta.env.VITE_API_BASE_URL,
+  timeout: 30_000,
   headers: {
     'Content-Type': 'application/json;charset=UTF-8',
   },
 })
 
-service.interceptors.request.use((config) => {
-  const withToken = (config as AxiosRequestConfig & { requestConfig?: RequestConfig }).requestConfig?.withToken ?? true
-  const token = getStoredToken()
+/** 统一错误提示出口。 */
+function showError(message: string, silentError?: boolean) {
+  if (!silentError && message) {
+    Message.error(message)
+  }
+}
 
-  // 默认自动携带 token，公开接口可通过 withToken: false 关闭。
+/** 当登录态失效时，跳转到登录页并保留回跳地址。 */
+function redirectToLogin() {
+  if (window.location.pathname === '/auth/login') {
+    return
+  }
+
+  const currentPath = `${window.location.pathname}${window.location.search}${window.location.hash}`
+  const loginUrl = new URL('/auth/login', window.location.origin)
+
+  if (currentPath) {
+    loginUrl.searchParams.set('redirect', currentPath)
+  }
+
+  window.location.assign(loginUrl.toString())
+}
+
+/** 请求拦截器：统一注入 token 与租户信息。 */
+service.interceptors.request.use((config: InternalAxiosRequestConfig & { requestConfig?: RequestConfig }) => {
+  const withToken = config.requestConfig?.withToken ?? true
+  const token = getToken()
+  const tenantId = getTenantId()
+
   if (withToken && token) {
     config.headers.Authorization = `Bearer ${token}`
+  }
+
+  if (tenantId) {
+    config.headers['X-Tenant-Id'] = tenantId
   }
 
   return config
 })
 
+/** 响应拦截器：统一处理业务成功态、失败态和 401。 */
 service.interceptors.response.use(
-  (response) => {
-    const result = response.data as ApiResponse
+  (response: AxiosResponse<ApiResponse>) => {
+    const result = response.data
+    const requestConfig = (response.config as RequestOptions).requestConfig
 
-    // 非标准包装响应直接透传，兼容文件流或第三方接口。
-    if (typeof result?.code !== 'number') {
-      return response.data
+    if (response.request?.responseType === 'blob') {
+      return response
     }
 
-    if (result.code === SUCCESS_CODE) {
-      return result
+    if (!result || typeof result !== 'object' || !('success' in result)) {
+      return response
+    }
+
+    if (result.success) {
+      return response
     }
 
     const message = result.msg || '请求失败，请稍后重试'
+    if (String(result.code) === '401') {
+      clearAuthState()
+      showError(message, requestConfig?.silentError)
 
-    // 登录失效时清理 token，交给路由守卫处理后续访问控制。
-    if (result.code === TIMEOUT_CODE) {
-      localStorage.removeItem(TOKEN_KEY)
-      sessionStorage.removeItem(TOKEN_KEY)
+      if (requestConfig?.redirectOnUnauthorized !== false) {
+        redirectToLogin()
+      }
+
+      return Promise.reject(new Error(message))
     }
 
-    Message.error(message)
+    showError(message, requestConfig?.silentError)
     return Promise.reject(new Error(message))
   },
   (error: AxiosError<ApiResponse>) => {
-    const message = error.response?.data?.msg || error.message || '网络异常，请稍后重试'
-    Message.error(message)
+    const requestConfig = (error.config as RequestOptions | undefined)?.requestConfig
+    const status = error.response?.status
+    const message = error.response?.data?.msg || (status ? StatusCodeMessage[status] : '') || error.message || '网络异常，请稍后重试'
+
+    if (status === 401) {
+      clearAuthState()
+      showError(message, requestConfig?.silentError)
+
+      if (requestConfig?.redirectOnUnauthorized !== false) {
+        redirectToLogin()
+      }
+
+      return Promise.reject(error)
+    }
+
+    showError(message, requestConfig?.silentError)
     return Promise.reject(error)
   },
 )
 
+/** 统一请求入口，返回解包后的业务响应。 */
 function request<T>(config: AxiosRequestConfig, requestConfig?: RequestConfig) {
-  // 统一封装请求出口，便于后续扩展埋点、重试、签名等能力。
-  return service.request<ApiResponse<T>, ApiResponse<T>>({
+  return service.request<ApiResponse<T>, AxiosResponse<ApiResponse<T>>>({
     ...config,
     requestConfig,
-  } as AxiosRequestConfig & { requestConfig?: RequestConfig })
+  } as RequestOptions).then((response) => response.data)
 }
 
-export const http = {
-  get<T>(url: string, params?: Record<string, unknown>, config?: RequestConfig) {
-    return request<T>({ url, method: 'GET', params }, config)
+/** 对外提供的 HTTP 方法集合。 */
+const http = {
+  /** GET 请求。 */
+  get<T, P = Record<string, unknown>>(url: string, params?: P, config?: RequestConfig & AxiosRequestConfig) {
+    return request<T>({ url, method: 'GET', params, ...config }, config)
   },
-  post<T>(url: string, data?: Record<string, unknown>, config?: RequestConfig) {
-    return request<T>({ url, method: 'POST', data }, config)
+  /** POST 请求。 */
+  post<T, D = unknown>(url: string, data?: D, config?: RequestConfig & AxiosRequestConfig) {
+    return request<T>({ url, method: 'POST', data, ...config }, config)
   },
-  put<T>(url: string, data?: Record<string, unknown>, config?: RequestConfig) {
-    return request<T>({ url, method: 'PUT', data }, config)
+  /** PUT 请求。 */
+  put<T, D = unknown>(url: string, data?: D, config?: RequestConfig & AxiosRequestConfig) {
+    return request<T>({ url, method: 'PUT', data, ...config }, config)
   },
-  delete<T>(url: string, params?: Record<string, unknown>, config?: RequestConfig) {
-    return request<T>({ url, method: 'DELETE', params }, config)
+  /** PATCH 请求。 */
+  patch<T, D = unknown>(url: string, data?: D, config?: RequestConfig & AxiosRequestConfig) {
+    return request<T>({ url, method: 'PATCH', data, ...config }, config)
+  },
+  /** DELETE 请求。 */
+  delete<T, P = Record<string, unknown>>(url: string, params?: P, config?: RequestConfig & AxiosRequestConfig) {
+    return request<T>({ url, method: 'DELETE', params, ...config }, config)
   },
 }
 
-export { API_PREFIX, TOKEN_KEY }
+export default http

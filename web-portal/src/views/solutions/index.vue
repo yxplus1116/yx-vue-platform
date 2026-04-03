@@ -24,7 +24,7 @@
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="less">
 .solutions-page {
   display: flex;
   flex-direction: column;
@@ -32,5 +32,17 @@
 
 .solutions-card {
   padding: 32px;
+}
+
+@media (max-width: 768px) {
+  .solutions-card {
+    padding: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .solutions-card {
+    padding: 16px;
+  }
 }
 </style>

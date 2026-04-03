@@ -4,14 +4,14 @@
       <template #extra>
         <a-space>
           <a-button type="primary" @click="$router.push('/')">返回首页</a-button>
-          <a-button @click="$router.push('/business')">前往业务中心</a-button>
+          <!-- <a-button @click="$router.push('/business')">前往业务中心</a-button> -->
         </a-space>
       </template>
     </a-result>
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="less">
 .not-found {
   min-height: 100vh;
   display: grid;

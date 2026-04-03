@@ -14,7 +14,7 @@ import AppHeader from '@/components/layout/AppHeader.vue'
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="less">
 .portal-layout {
   min-height: 100vh;
   display: flex;
@@ -23,12 +23,12 @@ import AppHeader from '@/components/layout/AppHeader.vue'
 
 .portal-layout__main {
   flex: 1;
-  padding: 20px 0 32px;
+  padding: 92px 0 32px;
 }
 
 @media (max-width: 768px) {
   .portal-layout__main {
-    padding-top: 14px;
+    padding-top: 86px;
     padding-bottom: 24px;
   }
 }

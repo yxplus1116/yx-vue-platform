@@ -1,39 +1,43 @@
-import 'iconify-icon'
-import '@/styles/index.less'
-import 'ant-design-vue/dist/reset.css'
-import 'virtual:uno.css'
-// Register icon sprite
+import { createApp } from 'vue'
+import ArcoVue, { Card, Drawer, Modal } from '@arco-design/web-vue'
+import '@/styles/arco-ui/index.less'
+// import '@arco-themes/vue-gi-demo/index.less'
+// import '@arco-design/web-vue/dist/arco.css'
+
+// 额外引入 Arco Design Icon图标库
+import ArcoVueIcon from '@arco-design/web-vue/es/icon'
+import App from './App.vue'
+import router from './router'
+
+// 使用动画库
+import 'animate.css/animate.min.css'
+
+// 自定义过渡动画
+import '@/styles/css/transition.css'
+
+// 导入全局scss主文件
+import '@/styles/index.scss'
+
+// 支持SVG
 import 'virtual:svg-icons-register'
 
-import { createApp } from 'vue'
-import { registerGlobComp } from '@/components/registerGlobComp'
-import { setupGlobDirectives } from '@/directives'
-import { initAppConfig } from '@/hooks/config'
-import { setupRouter } from '@/router'
-import { setupStore } from '@/store'
-import App from './App.vue'
+// 自定义指令
+import directives from './directives'
 
-async function bootstrap() {
-  const app = createApp(App)
+// 状态管理
+import pinia from '@/stores'
 
-  // 注册全局 Antd UI组件
-  registerGlobComp(app)
+// 对特定组件进行默认配置
+Card.props.bordered = false
 
-  // 挂载状态管理
-  setupStore(app)
+const app = createApp(App)
+Modal._context = app._context
+Drawer._context = app._context
 
-  // Initialize internal system configuration
-  // 初始化内部系统配置
-  initAppConfig()
+app.use(router)
+app.use(pinia)
+app.use(ArcoVue)
+app.use(ArcoVueIcon)
+app.use(directives)
 
-  // 挂载路由
-  setupRouter(app)
-
-  // Register global directive
-  // 注册全局指令
-  setupGlobDirectives(app)
-
-  app.mount('#app')
-}
-
-bootstrap()
+app.mount('#app')

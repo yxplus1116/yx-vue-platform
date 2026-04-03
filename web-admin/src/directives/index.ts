@@ -1,9 +1,10 @@
-/**
- * Configure and register global directives
- */
 import type { App } from 'vue'
-import { setupPermissionDirective } from './permission'
+import hasPerm from './permission/hasPerm'
+import hasRole from './permission/hasRole'
 
-export function setupGlobDirectives(app: App) {
-  setupPermissionDirective(app)
+export default {
+  install(Vue: App) {
+    Vue.directive('permission', hasPerm)
+    Vue.directive('role', hasRole)
+  },
 }
