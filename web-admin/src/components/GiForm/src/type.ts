@@ -1,5 +1,9 @@
 import type * as A from '@arco-design/web-vue'
 import type { VNode } from 'vue'
+import type { GiEditorProps } from '@/components/GiEditor/index.vue'
+import type { GiImageUploadProps } from '@/components/GiImageUpload'
+import type { GiMapLocationPickerProps } from '@/components/GiMapLocationPicker/index.vue'
+import type { GiRegionSelectProps } from '@/components/GiRegionSelect/index.vue'
 
 export type ColumnItemType =
   | 'input'
@@ -24,6 +28,10 @@ export type ColumnItemType =
   | 'slider'
   | 'cascader'
   | 'upload'
+  | 'image-upload'
+  | 'editor'
+  | 'map-location-picker'
+  | 'region-select'
   | 'auto-complete'
   | 'mention'
   | 'group-title'
@@ -51,6 +59,10 @@ export type ComponentProps =
   & A.SliderInstance['$props']
   & A.CascaderInstance['$props']
   & A.UploadInstance['$props']
+  & GiImageUploadProps
+  & GiEditorProps
+  & GiMapLocationPickerProps
+  & GiRegionSelectProps
   & A.AutoCompleteInstance['$props']
   & A.MentionInstance['$props']
   & A.AlertInstance['$props']

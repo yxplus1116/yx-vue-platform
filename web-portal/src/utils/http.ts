@@ -2,7 +2,7 @@ import axios, { AxiosError, type AxiosRequestConfig, type AxiosResponse, type In
 import { Message } from '@arco-design/web-vue'
 import '@arco-design/web-vue/es/message/style/css.js'
 import { clearAuthState, getTenantId, getToken } from '@/modules/auth'
-import type { ApiResponse, RequestConfig } from './types'
+import type { ApiResponse, RequestConfig } from '@/types/api'
 
 /** axios 配置与业务扩展配置的组合类型。 */
 type RequestOptions = AxiosRequestConfig & {

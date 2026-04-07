@@ -1,55 +1,8 @@
-import http from '@/api/http'
-import { getVenueById, venueItems, type VenueImageTheme, type VenueItem } from '@/modules/venues/data'
+import http from '@/utils/http'
+import { getVenueById, venueItems } from '@/modules/venues/data'
+import type { VenueCategoryItem, VenueFilterGroup, VenueItem, VenueListQuery, VenueListResp } from './type'
 
-/** 考点筛选项键名。 */
-export type VenueFilterKey = 'province' | 'city' | 'scene' | 'venueType' | 'seatCount'
-
-/** 首页筛选栏单项配置。 */
-export interface VenueFilterGroup {
-  /** 筛选项键名。 */
-  key: VenueFilterKey
-  /** 筛选项默认展示文案。 */
-  label: string
-  /** 筛选项可选值集合。 */
-  options: string[]
-}
-
-/** 考点列表查询条件。 */
-export interface VenueListQuery {
-  /** 省份筛选值。 */
-  province?: string
-  /** 城市筛选值。 */
-  city?: string
-  /** 场景筛选值。 */
-  scene?: string
-  /** 考点类型筛选值。 */
-  venueType?: string
-  /** 考位区间筛选值。 */
-  seatCount?: string
-}
-
-/** 首页分类卡片主题。 */
-export type CategoryTheme = 'business' | 'public' | 'private'
-
-/** 首页分类卡片配置。 */
-export interface VenueCategoryItem {
-  /** 分类标题。 */
-  title: string
-  /** 分类副标题。 */
-  subtitle: string
-  /** 分类说明文案。 */
-  description: string
-  /** 分类视觉主题。 */
-  theme: CategoryTheme
-}
-
-/** 考点列表响应结构。 */
-export interface VenueListResp {
-  /** 当前页的考点列表。 */
-  list: VenueItem[]
-  /** 当前查询条件下的总记录数。 */
-  total: number
-}
+export type * from './type'
 
 /** 首页分类入口配置。 */
 export const venueCategoryItems: VenueCategoryItem[] = [
@@ -162,6 +115,3 @@ export async function getVenueDetail(id: number) {
     timestamp: new Date().toISOString(),
   })
 }
-
-/** 导出考点基础类型，便于页面统一从 API 层引用。 */
-export type { VenueImageTheme, VenueItem }

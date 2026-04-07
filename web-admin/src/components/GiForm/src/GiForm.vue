@@ -26,6 +26,41 @@
                   @update:model-value="updateValue($event, item.field)"
                 />
               </template>
+              <template v-else-if="item.type === 'image-upload'">
+                <GiImageUpload
+                  v-bind="getComponentBindProps(item)"
+                  :model-value="modelValue[item.field as keyof typeof modelValue]"
+                  @update:model-value="updateValue($event, item.field)"
+                >
+                  <template v-for="(slotValue, slotKey) in item?.slots" :key="slotKey" #[slotKey]="scope">
+                    <template v-if="typeof slotValue === 'string'">{{ slotValue }}</template>
+                    <template v-else-if="slotValue">
+                      <component :is="slotValue(scope)"></component>
+                    </template>
+                  </template>
+                </GiImageUpload>
+              </template>
+              <template v-else-if="item.type === 'editor'">
+                <GiEditor
+                  v-bind="getComponentBindProps(item)"
+                  :model-value="modelValue[item.field as keyof typeof modelValue]"
+                  @update:model-value="updateValue($event, item.field)"
+                />
+              </template>
+              <template v-else-if="item.type === 'region-select'">
+                <GiRegionSelect
+                  v-bind="getComponentBindProps(item)"
+                  :model-value="modelValue[item.field as keyof typeof modelValue]"
+                  @update:model-value="updateRegionValue($event, item)"
+                />
+              </template>
+              <template v-else-if="item.type === 'map-location-picker'">
+                <GiMapLocationPicker
+                  v-bind="getComponentBindProps(item)"
+                  :model-value="modelValue[item.field as keyof typeof modelValue]"
+                  @update:model-value="updateMapLocationValue($event, item)"
+                />
+              </template>
               <component
                 :is="`a-${item.type}`" v-else v-bind="getComponentBindProps(item)"
                 :model-value="modelValue[item.field as keyof typeof modelValue]"
@@ -83,8 +118,13 @@
 
 <script setup lang="ts">
 import { cloneDeep, omit } from 'lodash-es'
+import type * as A from '@arco-design/web-vue'
 import type { FormInstance, GridItemProps, GridProps } from '@arco-design/web-vue'
 import type { ColumnItem } from './type'
+import GiEditor from '@/components/GiEditor/index.vue'
+import GiImageUpload from '@/components/GiImageUpload'
+import GiMapLocationPicker, { type GiMapLocationPickerProps, type GiMapLocationValue } from '@/components/GiMapLocationPicker/index.vue'
+import GiRegionSelect, { type GiRegionSelectProps, type GiRegionValue } from '@/components/GiRegionSelect/index.vue'
 
 interface Props {
   modelValue: any
@@ -161,7 +201,7 @@ const getPlaceholder = (item: ColumnItem) => {
   if (['input', 'input-number', 'input-password', 'textarea', 'input-tag', 'mention'].includes(item.type)) {
     return `请输入${item.label}`
   }
-  if (['select', 'tree-select', 'cascader'].includes(item.type)) {
+  if (['select', 'tree-select', 'cascader', 'region-select'].includes(item.type)) {
     return `请选择${item.label}`
   }
   if (['date-picker'].includes(item.type)) {
@@ -197,6 +237,29 @@ const getComponentBindProps = (item: ColumnItem) => {
 /** 表单数据更新  */
 const updateValue = (value: any, field: string) => {
   emit('update:modelValue', Object.assign(props.modelValue, { [field]: value }))
+}
+
+/** 地区组件回填多个表单字段。 */
+const updateRegionValue = (value: GiRegionValue, item: ColumnItem) => {
+  const regionProps = (item.props || {}) as GiRegionSelectProps
+
+  emit('update:modelValue', Object.assign(props.modelValue, {
+    [item.field]: value,
+    ...(regionProps.provinceField ? { [regionProps.provinceField]: value.province } : {}),
+    ...(regionProps.cityField ? { [regionProps.cityField]: value.city } : {}),
+  }))
+}
+
+/** 地图选点组件回填地址与经纬度字段。 */
+const updateMapLocationValue = (value: GiMapLocationValue, item: ColumnItem) => {
+  const locationProps = (item.props || {}) as GiMapLocationPickerProps
+
+  emit('update:modelValue', Object.assign(props.modelValue, {
+    [item.field]: value,
+    ...(locationProps.addressField ? { [locationProps.addressField]: value.address } : {}),
+    ...(locationProps.longitudeField ? { [locationProps.longitudeField]: value.longitude } : {}),
+    ...(locationProps.latitudeField ? { [locationProps.latitudeField]: value.latitude } : {}),
+  }))
 }
 
 /** 必填项 */

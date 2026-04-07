@@ -1,5 +1,5 @@
 name: "🙋 咨询问题/Ask Question"
-description: 咨询关于 ContiNew Admin UI 的问题，包括但不限于使用问题、部署问题、设计规范等。/Ask a question about ContiNew Admin UI.
+description: 咨询关于 yxgo UI 的问题，包括但不限于使用问题、部署问题、设计规范等。/Ask a question about yxgo UI.
 labels:
   - question
 body:
@@ -24,8 +24,8 @@ body:
 
   - type: dropdown
     attributes:
-      label: ContiNew Admin 版本
-      description: 您使用的 ContiNew Admin 版本，如没有支持的版本选项，请查阅 [更新日志](https://continew.top/docs/admin/changelog/) 或 [版本升级指南](https://continew.top/docs/admin/guide/upgrade.html) 并升级至最新稳定版本。
+      label: yxgo 版本
+      description: 您使用的 yxgo 版本，如没有支持的版本选项，请查阅 [更新日志](https://continew.top/docs/admin/changelog/) 或 [版本升级指南](https://continew.top/docs/admin/guide/upgrade.html) 并升级至最新稳定版本。
       multiple: false
       options:
         - 4.2.0-SNAPSHOT (开发版本-dev 分支)
@@ -38,7 +38,7 @@ body:
     attributes:
       label: 问题描述
       description: 详细描述您的问题。
-      placeholder: 您想了解关于 ContiNew Admin UI 的哪些内容？请提供尽可能多的上下文信息。
+      placeholder: 您想了解关于 yxgo UI 的哪些内容？请提供尽可能多的上下文信息。
     validations:
       required: true
 

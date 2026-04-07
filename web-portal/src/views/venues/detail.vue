@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { getVenueDetail, type VenueImageTheme, type VenueItem } from '@/api'
+import { getVenueDetail, type VenueImageTheme, type VenueItem } from '@/apis'
 import VenueMap from '@/components/map/VenueMap.vue'
 import collectIcon from '@/views/home/image/collect.png'
 import emailIcon from '@/views/home/image/email.png'

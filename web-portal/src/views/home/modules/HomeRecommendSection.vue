@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import type { VenueItem } from '@/api'
+import type { VenueItem } from '@/apis'
 import collectIcon from '../image/collect.png'
 
 const router = useRouter()

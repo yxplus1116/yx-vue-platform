@@ -1,4 +1,4 @@
-# ContiNew Admin UI
+# yxgo UI
 
 <a href="https://github.com/continew-org/continew-admin-ui" title="Release" target="_blank">
 <img src="https://img.shields.io/badge/SNAPSHOT-v4.2.0-%23ff3f59.svg" alt="Release" />
@@ -39,11 +39,11 @@
 
 ## 简介
 
-全新 3.0 版本，基于 Gi Demo 前端模板开发的 ContiNew Admin 前端适配项目。
+全新 3.0 版本，基于 Gi Demo 前端模板开发的 yxgo 前端适配项目。
 
 **AI 编程纪元已经开启，基于 ContiNew 项目开发，让 AI 助手“学习”更优雅的代码规范，“写出”更优质的代码。**
 
-ContiNew Admin（Continue New Admin），页面现代美观，且专注设计与代码细节的 **高质量多租户中后台** 管理系统框架。开箱即用，持续迭代优化，持续提供舒适的开发体验。
+yxgo（Continue New Admin），页面现代美观，且专注设计与代码细节的 **高质量多租户中后台** 管理系统框架。开箱即用，持续迭代优化，持续提供舒适的开发体验。
 
 当前采用的技术栈：Spring Boot3（Java17）、Vue3 & Arco Design & TS & Vite、Sa-Token、MyBatis Plus、Redisson、FastExcel、CosId、JetCache、JustAuth、Crane4j、Spring Doc、Hutool 等。
 
@@ -83,7 +83,7 @@ ContiNew Admin（Continue New Admin），页面现代美观，且专注设计与
 
 **AI 编程纪元已经开启，基于 ContiNew 项目开发，让 AI 助手“学习”更优雅的代码规范，“写出”更优质的代码。**
 
-**1.长期稳定：** 自 2022 年 12 月 8 日创建，2023 年 3 月 26 日发布 v1.0.0，截至今日，ContiNew Admin 已累计发布 25 个版本，ContiNew Starter 已累计发布 43 个版本。
+**1.长期稳定：** 自 2022 年 12 月 8 日创建，2023 年 3 月 26 日发布 v1.0.0，截至今日，yxgo 已累计发布 25 个版本，ContiNew Starter 已累计发布 43 个版本。
 
 **2.甄选技术栈：** ContiNew（Continue New） 项目致力于持续迭代优化，确保技术栈紧跟时代。在技术选型时，我们进行了深度广泛的调研，从流行度、成熟度和发展潜力等多维度精心挑选技术栈。
 
@@ -123,7 +123,7 @@ public class DeptController extends BaseController<DeptService, DeptResp, DeptDe
 
 **10.质量与安全并重：** 我们高度重视项目质量与安全，CI 已集成 Sonar、Codacy，代码提交即自动扫描质量问题。定期扫描 CVE 漏洞，及时解决潜在风险。封装了数据库字段加密、JSON 脱敏、XSS 过滤等工具，提供全方位的安全解决方案。
 
-许多项目在开发或交付过程中需满足 Sonarqube 等质量指标，使用 ContiNew Admin 框架，让你从一开始就站在高质量的起点。
+许多项目在开发或交付过程中需满足 Sonarqube 等质量指标，使用 yxgo 框架，让你从一开始就站在高质量的起点。
 
 ---
 

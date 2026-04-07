@@ -17,41 +17,28 @@
       </a-dropdown>
     </template>
     <a-row :gutter="[14, 14]">
-      <a-col
-        v-for="(item, index) in list"
-        :key="index"
-        :xs="24"
-        :sm="24"
-        :md="12"
-        :lg="12"
-        :xl="8"
-        :xxl="8"
-      >
+      <a-col v-for="(item, index) in list" :key="index" :xs="24" :sm="24" :md="12" :lg="12" :xl="8" :xxl="8">
         <a-card :bordered="true" hoverable>
           <div class="badge badge-right" :style="`background-color: ${item.statusColor}`">{{ item.status }}</div>
           <a-card-meta>
             <template #title>
               <a-space>
                 <img :src="item.logo" width="25px" height="25px" alt="logo" />
-                <a-typography-paragraph
-                  :ellipsis="{
-                    rows: 1,
-                    showTooltip: true,
-                    css: true,
-                  }"
-                >
+                <a-typography-paragraph :ellipsis="{
+                  rows: 1,
+                  showTooltip: true,
+                  css: true,
+                }">
                   {{ item.alias }}
                 </a-typography-paragraph>
               </a-space>
             </template>
             <template #description>
-              <a-typography-paragraph
-                :ellipsis="{
-                  rows: 2,
-                  showTooltip: true,
-                  css: true,
-                }"
-              >
+              <a-typography-paragraph :ellipsis="{
+                rows: 2,
+                showTooltip: true,
+                css: true,
+              }">
                 <a-typography-text type="secondary">
                   {{ item.desc }}
                 </a-typography-text>
@@ -61,7 +48,9 @@
           <template #actions>
             <a-tooltip content="点个 Star 吧">
               <span class="icon-hover">
-                <a :href="item.url" target="_blank" rel="noopener"><IconThumbUp :size="20" /></a>
+                <a :href="item.url" target="_blank" rel="noopener">
+                  <IconThumbUp :size="20" />
+                </a>
               </span>
             </a-tooltip>
           </template>
@@ -74,7 +63,7 @@
 <script setup lang="ts">
 const list = [
   {
-    alias: 'ContiNew Admin',
+    alias: 'yxgo',
     name: 'continew-admin',
     owner: 'continew-org',
     desc: '🔥Almost最佳后端规范🔥持续迭代优化的前后端分离中后台管理系统框架，开箱即用，持续提供舒适的开发体验。',
@@ -94,20 +83,20 @@ const list = [
     statusColor: 'rgb(var(--primary-6))',
   },
   {
-    alias: 'ContiNew Admin UI',
+    alias: 'yxgo UI',
     name: 'continew-admin-ui',
     owner: 'continew-org',
-    desc: '全新 3.x 版本，基于 Gi Demo 前端模板开发的 ContiNew Admin 前端适配项目。',
+    desc: '全新 3.x 版本，基于 Gi Demo 前端模板开发的 yxgo 前端适配项目。',
     logo: 'https://continew.top/logo.svg',
     url: 'https://gitee.com/continew/continew-admin-ui/stargazers',
     status: '迭代',
     statusColor: 'rgb(var(--primary-6))',
   },
   {
-    alias: 'ContiNew Admin UI Arco',
+    alias: 'yxgo UI Arco',
     name: 'continew-admin-ui-arco',
     owner: 'continew-org',
-    desc: '2.5 版本，基于 Arco Design Pro 前端模板开发的 ContiNew Admin 前端适配项目。',
+    desc: '2.5 版本，基于 Arco Design Pro 前端模板开发的 yxgo 前端适配项目。',
     logo: 'https://continew.top/logo.svg',
     url: 'https://gitee.com/continew/continew-admin-ui-arco/stargazers',
     status: '归档',
@@ -117,7 +106,7 @@ const list = [
     alias: 'ContiNew Cloud',
     name: 'continew-admin',
     owner: 'continew',
-    desc: 'ContiNew Admin 微服务版本。基于 SpringBoot 3.x、Spring Cloud 2023 & Alibaba。',
+    desc: 'yxgo 微服务版本。基于 SpringBoot 3.x、Spring Cloud 2023 & Alibaba。',
     logo: 'https://continew.top/logo.svg',
     url: '#',
     status: '孵化',
@@ -140,6 +129,7 @@ const list = [
 :deep(.arco-card-body) {
   position: relative;
   overflow: hidden;
+
   .badge {
     position: absolute;
     font-size: 11px;
@@ -149,6 +139,7 @@ const list = [
     width: 74px;
     color: #fff;
   }
+
   .badge-left {
     -moz-transform: rotate(-45deg);
     -ms-transform: rotate(-45deg);
@@ -158,6 +149,7 @@ const list = [
     left: -20px;
     top: 6px;
   }
+
   .badge-right {
     -moz-transform: rotate(45deg);
     -ms-transform: rotate(45deg);
@@ -180,6 +172,7 @@ const list = [
   transition: all 0.1s;
   animation: icon-hover-animated 1.2s ease-in-out infinite;
 }
+
 .icon-hover:hover {
   background-color: rgb(var(--gray-2));
 }

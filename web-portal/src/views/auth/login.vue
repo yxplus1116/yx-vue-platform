@@ -2,7 +2,7 @@
 import { onMounted, reactive, ref } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getImageCaptcha } from '@/api'
+import { getImageCaptcha } from '@/apis'
 import { login } from '@/modules/auth'
 
 interface CaptchaState {

@@ -5,7 +5,7 @@
 - Arco Design Vue
 - `unplugin-vue-components` 组件按需引入
 - Arco 组件样式按需加载
-- 与 `web-admin` 对齐的统一认证与 axios 封装
+- 与 `web-admin` 对齐的 `src/apis + src/utils/http.ts` 请求层结构
 - `/dev-api` 开发代理配置
 - 图形验证码登录接入预留
 

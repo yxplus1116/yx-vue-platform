@@ -5,7 +5,7 @@ import {
   accountLogin,
   getUserInfo,
   logout as logoutApi,
-} from '@/api'
+} from '@/apis'
 import { TENANT_ID_KEY, TOKEN_KEY, USER_KEY } from './constants'
 
 /** 当前会话 token。 */

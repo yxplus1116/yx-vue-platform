@@ -7,7 +7,7 @@ import {
   venueFilterGroups,
   type VenueCategoryItem,
   type VenueItem,
-} from '@/api'
+} from '@/apis'
 import HomeCategorySection from './modules/HomeCategorySection.vue'
 import HomeFilterBar from './modules/HomeFilterBar.vue'
 import HomeHeroSection from './modules/HomeHeroSection.vue'
