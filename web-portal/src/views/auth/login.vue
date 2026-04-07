@@ -3,7 +3,8 @@ import { onMounted, reactive, ref } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getImageCaptcha } from '@/apis'
-import { login } from '@/modules/auth'
+import { useAuthStore } from '@/stores'
+import { encryptByRsa } from '@/utils/encrypt'
 
 interface CaptchaState {
   uuid: string
@@ -11,17 +12,32 @@ interface CaptchaState {
   enabled: boolean
 }
 
+// 登录成功后用于页面跳转
 const router = useRouter()
+
+// 用来读取 redirect 回跳地址
 const route = useRoute()
 
+// 登录相关状态统一交给认证仓库
+const authStore = useAuthStore()
+
+// 登录按钮加载状态
 const loading = ref(false)
+
+// 验证码刷新加载状态
 const captchaLoading = ref(false)
+
+// 多租户场景下可手动输入租户编码
 const tenantCode = ref('')
+
+// 验证码显示状态，包含图片和 uuid
 const captcha = reactive<CaptchaState>({
   uuid: '',
   image: '',
   enabled: true,
 })
+
+// 登录表单数据
 const form = reactive({
   username: '',
   password: '',
@@ -29,6 +45,7 @@ const form = reactive({
   remember: true,
 })
 
+// 后端有时直接返回 base64，有时只返回正文，这里统一补齐 data url
 function normalizeCaptchaImage(value: string) {
   if (!value) {
     return ''
@@ -41,6 +58,7 @@ function normalizeCaptchaImage(value: string) {
   return `data:image/png;base64,${value}`
 }
 
+// 刷新验证码，同时同步是否启用验证码开关
 async function refreshCaptcha() {
   captchaLoading.value = true
 
@@ -58,6 +76,7 @@ async function refreshCaptcha() {
   }
 }
 
+// 提交登录，密码会先按后台同样的 RSA 规则加密
 async function handleLogin() {
   if (!form.username || !form.password) {
     Message.warning('请输入账号和密码')
@@ -72,9 +91,9 @@ async function handleLogin() {
   loading.value = true
 
   try {
-    await login({
+    await authStore.login({
       username: form.username,
-      password: form.password,
+      password: encryptByRsa(form.password) || '',
       captcha: form.captcha,
       uuid: captcha.uuid,
     }, form.remember, tenantCode.value || undefined)
@@ -92,10 +111,12 @@ async function handleLogin() {
   }
 }
 
+// 找回密码页面还没接，这里先给明确提示
 function handleForgotPassword() {
   Message.info('找回密码页面待接入')
 }
 
+// 首次进入登录页就先拉一张验证码
 onMounted(() => {
   refreshCaptcha()
 })

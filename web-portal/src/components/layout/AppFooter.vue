@@ -1,14 +1,16 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { isAuthenticated } from '@/modules/auth'
+import { useAuthStore } from '@/stores'
 import footerBg from '@/assets/image/footerBg.png'
 
 const footerHeroStyle = {
   backgroundImage: `url(${footerBg})`,
 }
 
-// 已登录时 CTA 改为进入业务中心，避免继续跳去注册页后被守卫重定向。
-const authed = computed(() => isAuthenticated())
+const authStore = useAuthStore()
+
+// 已登录时 CTA 改成进入平台，避免再跳去注册页
+const authed = computed(() => authStore.isAuthenticated)
 </script>
 
 <template>

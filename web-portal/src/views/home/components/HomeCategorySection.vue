@@ -2,16 +2,14 @@
 import category1 from '../image/category1.png'
 import category2 from '../image/categor2.png'
 import category3 from '../image/categor3.png'
-
-interface CategoryItem {
-  title: string
-  subtitle: string
-  description: string
-  theme?: 'business' | 'public' | 'private'
-}
+import type { HomeCategoryItem } from '../types'
 
 defineProps<{
-  items: CategoryItem[]
+  items: HomeCategoryItem[]
+}>()
+
+const emit = defineEmits<{
+  (e: 'select', value: string): void
 }>()
 
 const themeBackgroundMap = {
@@ -20,7 +18,7 @@ const themeBackgroundMap = {
   private: category3,
 }
 
-function getCardStyle(theme?: CategoryItem['theme']) {
+function getCardStyle(theme?: HomeCategoryItem['theme']) {
   const resolvedTheme = theme || 'business'
 
   return {
@@ -31,14 +29,21 @@ function getCardStyle(theme?: CategoryItem['theme']) {
 
 <template>
   <section class="home-category">
-    <article v-for="item in items" :key="item.title" class="home-category__card"
-      :class="`is-${item.theme || 'business'}`" :style="getCardStyle(item.theme)">
+    <button
+      v-for="item in items"
+      :key="item.value"
+      type="button"
+      class="home-category__card"
+      :class="[`is-${item.theme || 'business'}`, { 'is-active': item.active }]"
+      :style="getCardStyle(item.theme)"
+      @click="emit('select', item.value)"
+    >
       <div class="home-category__copy">
-        <h3>{{ item.title }}</h3>
+        <h3>{{ item.label }}</h3>
         <p>{{ item.subtitle }}</p>
-        <a-button type="primary" size="small">{{ item.description }}</a-button>
+        <span class="home-category__action">{{ item.active ? '当前分类' : '查看该分类' }}</span>
       </div>
-    </article>
+    </button>
   </section>
 </template>
 
@@ -57,20 +62,27 @@ function getCardStyle(theme?: CategoryItem['theme']) {
     justify-content: flex-start;
     min-height: 140px;
     padding: 16px 18px;
+    border: 1px solid transparent;
     border-radius: 6px;
     background-repeat: no-repeat;
     background-position: center;
     background-size: cover;
     overflow: hidden;
+    cursor: pointer;
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease,
+      border-color 0.2s ease;
 
-    &::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px rgba(31, 58, 122, 0.08);
     }
 
-
+    &.is-active {
+      border-color: rgba(47, 116, 247, 0.35);
+      box-shadow: 0 12px 24px rgba(47, 116, 247, 0.12);
+    }
   }
 
   &__copy {
@@ -97,19 +109,21 @@ function getCardStyle(theme?: CategoryItem['theme']) {
       font-size: 12px;
       line-height: 1.5;
     }
+  }
 
-    :deep(.arco-btn) {
-      margin-top: 8px;
-      min-width: 72px;
-      height: 28px;
-      padding: 0 14px;
-      border-radius: 4px;
-      border-color: #2f74f7;
-      background: linear-gradient(180deg, #4f8cff, #2f74f7);
-      font-size: 12px;
-      font-weight: 600;
-      box-shadow: none;
-    }
+  &__action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 88px;
+    height: 28px;
+    margin-top: 8px;
+    padding: 0 14px;
+    border-radius: 4px;
+    color: #ffffff;
+    background: linear-gradient(180deg, #4f8cff, #2f74f7);
+    font-size: 12px;
+    font-weight: 600;
   }
 }
 

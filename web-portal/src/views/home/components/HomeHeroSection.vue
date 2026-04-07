@@ -2,8 +2,24 @@
 import homeBg from '@/assets/image/homeBg.png'
 import searchIcon from '@/assets/image/searchIcon.png'
 
+const props = withDefaults(defineProps<{
+  keyword: string
+  loading?: boolean
+}>(), {
+  loading: false,
+})
+
+const emit = defineEmits<{
+  (e: 'update:keyword', value: string): void
+  (e: 'search'): void
+}>()
+
 const heroStyle = {
   backgroundImage: `url(${homeBg})`,
+}
+
+const handleSearch = () => {
+  emit('search')
 }
 </script>
 
@@ -15,8 +31,14 @@ const heroStyle = {
         <p>全国考点平台 - 聚合考点资源，助力高效对接</p>
 
         <div class="home-hero__search">
-          <input type="text" placeholder="输入考点名称或关键词，进行搜索" />
-          <button type="button" aria-label="搜索">
+          <input
+            :value="props.keyword"
+            type="text"
+            placeholder="输入考点名称进行搜索"
+            @input="emit('update:keyword', ($event.target as HTMLInputElement).value)"
+            @keydown.enter="handleSearch"
+          />
+          <button type="button" aria-label="搜索" :disabled="props.loading" @click="handleSearch">
             <img :src="searchIcon" alt="" />
           </button>
         </div>
@@ -109,6 +131,11 @@ const heroStyle = {
       font-size: 14px;
       font-weight: 700;
       cursor: pointer;
+
+      &:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
 
       img {
         display: block;

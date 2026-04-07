@@ -1,43 +1,33 @@
 <script setup lang="ts">
-import { computed, reactive } from 'vue'
+import { computed } from 'vue'
 import { IconDown } from '@arco-design/web-vue/es/icon'
-
-export interface FilterItem {
-  key: string
-  label: string
-  options: string[]
-}
+import type { HomeFilterGroup, HomeFilterKey, HomeFilterOption } from '../types'
 
 const props = defineProps<{
-  items: FilterItem[]
+  items: HomeFilterGroup[]
+  modelValue: Record<HomeFilterKey, string>
 }>()
 
 const emit = defineEmits<{
-  change: [values: Record<string, string>]
+  change: [payload: { key: HomeFilterKey, option: HomeFilterOption }]
 }>()
 
-// 筛选条当前先在组件内维护选中值，后续接接口时可以很自然地改成 v-model
-// 或者通过事件把筛选条件同步给首页列表查询。
-const selectedValues = reactive<Record<string, string>>(
-  props.items.reduce<Record<string, string>>((result, item) => {
-    result[item.key] = item.label
-    return result
-  }, {}),
-)
-
 const displayItems = computed(() =>
-  props.items.map((item) => ({
-    ...item,
-    selectedValue: selectedValues[item.key] || item.label,
-    displayLabel: selectedValues[item.key] || item.label,
-    isActive: selectedValues[item.key] !== item.label,
-  })),
+  props.items.map((item) => {
+    const currentValue = props.modelValue[item.key] || ''
+    const selectedOption = item.options.find((option) => option.value === currentValue)
+
+    return {
+      ...item,
+      selectedValue: currentValue,
+      displayLabel: selectedOption?.label || item.label,
+      isActive: Boolean(currentValue),
+    }
+  }),
 )
 
-const handleSelect = (key: string, value: string) => {
-  const nextValue = String(value)
-  selectedValues[key] = nextValue
-  emit('change', { ...selectedValues })
+const handleSelect = (key: HomeFilterKey, option: HomeFilterOption) => {
+  emit('change', { key, option })
 }
 </script>
 
@@ -50,9 +40,15 @@ const handleSelect = (key: string, value: string) => {
       </button>
 
       <template #content>
-        <a-doption v-for="option in item.options" :key="option" :value="option" class="home-filter__menu-item"
-          :class="{ 'is-selected': option === item.selectedValue }" @click="handleSelect(item.key, option)">
-          {{ option }}
+        <a-doption
+          v-for="option in item.options"
+          :key="`${item.key}-${option.value || option.label}`"
+          :value="option.value"
+          class="home-filter__menu-item"
+          :class="{ 'is-selected': option.value === item.selectedValue }"
+          @click="handleSelect(item.key, option)"
+        >
+          {{ option.label }}
         </a-doption>
       </template>
     </a-dropdown>

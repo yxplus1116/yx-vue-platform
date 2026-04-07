@@ -1,26 +1,27 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useRoute } from 'vue-router'
 import { Message } from '@arco-design/web-vue'
 import '@arco-design/web-vue/es/message/style/css.js'
-import { getAuthUser, isAuthenticated, logout } from '@/modules/auth'
+import { useAuthStore } from '@/stores'
 
 const route = useRoute()
+const authStore = useAuthStore()
+const { user: authUser, isAuthenticated: authed } = storeToRefs(authStore)
 
-// 设计稿里右侧是双按钮区域，这里保留同样布局，但根据登录态切换按钮语义。
-const authed = computed(() => isAuthenticated())
-const authUser = computed(() => getAuthUser())
+// 顶部右侧保留双按钮布局，只是按登录态切换按钮语义
 const scrolled = ref(false)
 const isHomePage = computed(() => route.name === 'home')
 const useSolidHeader = computed(() => !isHomePage.value || scrolled.value)
 
-// 头部默认透明吸顶，滚动后切换成浅白色渐变背景。
+// 首页顶部默认透明吸顶，滚动后切到浅色背景
 function handleScroll() {
   scrolled.value = window.scrollY > 12
 }
 
 async function handleLogout() {
-  await logout()
+  await authStore.logout()
   Message.success('已退出登录')
 }
 
@@ -37,7 +38,7 @@ onUnmounted(() => {
 <template>
   <header class="header-wrap" :class="{ 'is-scrolled': useSolidHeader }">
     <div class="page-shell header">
-      <!-- 顶部按设计稿保留“平台名称 + 右侧注册登录”结构。 -->
+      <!-- 顶部保留平台名称加登录注册入口 -->
       <RouterLink class="header__brand" to="/">考点平台</RouterLink>
 
       <div class="header__actions">
