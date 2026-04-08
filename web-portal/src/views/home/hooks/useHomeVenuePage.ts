@@ -2,7 +2,7 @@ import { computed, reactive, ref } from 'vue'
 import { getRegionChildren, type RegionItem } from '@/apis/region'
 import { getDictOptions, type DictOption } from '@/apis/system'
 import { getVenueList, type VenueItem } from '@/apis/venues'
-import { ROOT_REGION_CODE, VENUE_DICT_CODES, VENUE_ENABLED_STATUS } from '@/business/venues'
+import { buildVenueDisplayTags, ROOT_REGION_CODE, VENUE_DICT_CODES, VENUE_ENABLED_STATUS } from '@/business/venues'
 import { HOME_CATEGORY_META, HOME_FILTER_LABELS } from '../constants'
 import type {
   HomeCategoryItem,
@@ -11,6 +11,7 @@ import type {
   HomeFilterOption,
   HomeFilterState,
   HomePaginationState,
+  HomeVenueCardItem,
 } from '../types'
 
 // 每组筛选项都补一个“全部”选项，方便用户回到默认状态
@@ -92,6 +93,18 @@ export function useHomeVenuePage() {
         theme: HOME_CATEGORY_META[index]?.theme || 'business',
         active: filters.venueType === item.value,
       })),
+  )
+
+  // 首页卡片需要把三类字典标签和后台自定义标签一起展示
+  const recommendCardItems = computed<HomeVenueCardItem[]>(() =>
+    recommendItems.value.map((item) => ({
+      ...item,
+      displayTags: buildVenueDisplayTags(item, {
+        venueTypeOptions: venueTypeOptions.value,
+        sceneOptions: sceneOptions.value,
+        seatBucketOptions: seatBucketOptions.value,
+      }),
+    })),
   )
 
   // 筛选栏配置，页面组件直接按这份配置渲染
@@ -231,7 +244,7 @@ export function useHomeVenuePage() {
   return {
     filters,
     pagination,
-    recommendItems,
+    recommendCardItems,
     loading,
     categoryItems,
     filterGroups,

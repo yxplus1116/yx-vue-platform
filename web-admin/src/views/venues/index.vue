@@ -16,7 +16,7 @@
           style="width: 150px" @change="search" />
         <a-select v-model="queryForm.status" :options="booleans" placeholder="请选择状态:1启用 0停用" allow-clear
           style="width: 150px" @change="search" />
-        <a-select v-model="queryForm.isRecommended" :options="booleans" placeholder="请选择是否推荐" allow-clear
+        <a-select v-model="queryForm.recommended" :options="booleans" placeholder="请选择是否推荐" allow-clear
           style="width: 150px" @change="search" />
         <a-button @click="reset">
           <template #icon><icon-refresh /></template>
@@ -39,7 +39,7 @@
       </template>
       <template #coverImage="{ record }">
         <div class="venue-cover">
-          <img v-if="record.coverImage" :src="resolveImageUrl(record.coverImage)" :alt="record.title" />
+          <img v-if="record.coverImage" :src="resolveVenueImageUrl(record.coverImage)" :alt="record.title" />
           <span v-else>--</span>
         </div>
       </template>
@@ -48,16 +48,16 @@
           {{ Number(record.status) === 1 ? '启用' : '停用' }}
         </a-tag>
       </template>
-      <template #isRecommended="{ record }">
-        <a-tag :color="Number(record.isRecommended) === 1 ? 'arcoblue' : 'gray'">
-          {{ Number(record.isRecommended) === 1 ? '推荐' : '普通' }}
+      <template #recommended="{ record }">
+        <a-tag :color="Number(record.recommended) === 1 ? 'arcoblue' : 'gray'">
+          {{ Number(record.recommended) === 1 ? '推荐' : '普通' }}
         </a-tag>
       </template>
       <template #venueType="{ record }">
         <GiCellTag :value="record.venueType" :dict="venueType" />
       </template>
       <template #scene="{ record }">
-        <GiCellTag :value="record.scene" :dict="scene" />
+        <GiCellTags :data="getSceneLabels(record.scene)" />
       </template>
       <template #seatBucket="{ record }">
         <GiCellTag :value="record.seatBucket" :dict="seatCount" />
@@ -88,12 +88,14 @@ import { useDownload, useTable } from '@/hooks'
 import { useDict } from '@/hooks/app'
 import { isMobile } from '@/utils'
 import has from '@/utils/has'
-import { isHttp } from '@/utils/validate'
+import { mapVenueDictTags, resolveVenueImageUrl } from './utils'
 
 defineOptions({ name: 'Venues' })
 
+// 列表页筛选和单元格展示共用这三类字典
 const { venueType, booleans, seatCount, scene } = useDict('venueType', 'booleans', 'seatCount', 'scene')
 
+// 查询表单仍然保持单值筛选，交给后端做包含匹配
 const queryForm = reactive<VenuesQuery>({
   title: undefined,
   province: undefined,
@@ -102,10 +104,11 @@ const queryForm = reactive<VenuesQuery>({
   scene: undefined,
   venueType: undefined,
   status: undefined,
-  isRecommended: undefined,
+  recommended: undefined,
   sort: ['id,desc']
 })
 
+// 表格数据、分页和查询动作统一由 useTable 管理
 const {
   tableData: dataList,
   loading,
@@ -113,6 +116,7 @@ const {
   search,
   handleDelete
 } = useTable((page) => listVenues({ ...queryForm, ...page }), { immediate: true })
+
 const columns: TableInstance['columns'] = [
   // { title: '封面图', dataIndex: 'coverImage', slotName: 'coverImage', width: 110, align: 'center' },
   { title: '考点名称', dataIndex: 'title', width: 220, ellipsis: true, tooltip: true },
@@ -125,7 +129,7 @@ const columns: TableInstance['columns'] = [
   { title: '应用场景', dataIndex: 'scene', slotName: 'scene', width: 120, align: 'center' },
   { title: '联系电话', dataIndex: 'phone', width: 140, ellipsis: true, tooltip: true },
   { title: '状态', dataIndex: 'status', slotName: 'status', width: 100, align: 'center' },
-  { title: '推荐', dataIndex: 'isRecommended', slotName: 'isRecommended', width: 100, align: 'center' },
+  { title: '推荐', dataIndex: 'recommended', slotName: 'recommended', width: 100, align: 'center' },
   { title: '创建时间', dataIndex: 'createTime', width: 180, align: 'center' },
   {
     title: '操作',
@@ -138,22 +142,9 @@ const columns: TableInstance['columns'] = [
   }
 ]
 
-/** 将图片地址统一转换为前端可访问的完整地址。 */
-function resolveImageUrl(url?: string) {
-  if (!url) {
-    return ''
-  }
-
-  if (isHttp(url)) {
-    return url
-  }
-
-  const baseUrl = import.meta.env.VITE_API_BASE_URL || ''
-  if (!baseUrl) {
-    return url
-  }
-
-  return `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`
+// 列表里的应用场景也按多标签回显
+function getSceneLabels(value?: string) {
+  return mapVenueDictTags(value, scene.value || [])
 }
 
 // 重置
@@ -165,7 +156,7 @@ const reset = () => {
   queryForm.scene = undefined
   queryForm.venueType = undefined
   queryForm.status = undefined
-  queryForm.isRecommended = undefined
+  queryForm.recommended = undefined
   search()
 }
 

@@ -25,7 +25,7 @@ export interface VenuesResp {
   coverImage: string;
   gallery: string;
   status: string;
-  isRecommended: string;
+  recommended: string;
   sort: string;
   createdBy: string;
   updatedBy: string;
@@ -58,8 +58,9 @@ export interface VenuesDetailResp {
   coverImage: string;
   gallery: string;
   status: string;
-  isRecommended: string;
+  recommended: string;
   sort: string;
+  createTime: string;
   createdBy: string;
   updatedBy: string;
   createdAt: string;
@@ -68,63 +69,132 @@ export interface VenuesDetailResp {
   createUserString: string;
   updateUserString: string;
 }
+
+// 考点新增和修改请求体
+export interface VenueSaveReq {
+  // 考点名称
+  title: string;
+
+  // 首页卡片摘要
+  summary: string;
+
+  // 富文本详情
+  description: string;
+
+  // 省份名称
+  province: string;
+
+  // 城市名称
+  city: string;
+
+  // 列表展示地址
+  locationText: string;
+
+  // 详细地址
+  address: string;
+
+  // 经度
+  longitude: string;
+
+  // 纬度
+  latitude: string;
+
+  // 联系电话
+  phone: string;
+
+  // 联系邮箱
+  email: string;
+
+  // 考场数量
+  roomCount: number | undefined;
+
+  // 考位数量
+  seatCount: number | undefined;
+
+  // 考位区间编码
+  seatBucket: string;
+
+  // 应用场景编码，多个值时用英文逗号拼接
+  scene: string;
+
+  // 考点类型编码
+  venueType: string;
+
+  // 自定义标签
+  tags: string;
+
+  // 封面图
+  coverImage: string;
+
+  // 图集
+  gallery: string;
+
+  // 启停状态
+  status: number;
+
+  // 是否推荐
+  recommended: number;
+
+  // 排序值
+  sort: number;
+}
 export interface VenuesQuery {
-  title: string | undefined;
-  summary: string | undefined;
-  description: string | undefined;
-  province: string | undefined;
-  city: string | undefined;
-  locationText: string | undefined;
-  address: string | undefined;
-  longitude: string | undefined;
-  latitude: string | undefined;
-  phone: string | undefined;
-  email: string | undefined;
-  roomCount: string | undefined;
-  seatCount: string | undefined;
-  seatBucket: string | undefined;
-  scene: string | undefined;
-  venueType: string | undefined;
-  coverImage: string | undefined;
-  status: string | undefined;
-  isRecommended: string | undefined;
-  createdAt: string | undefined;
-  updatedAt: string | undefined;
-  sort: Array<string>;
+  title?: string;
+  summary?: string;
+  description?: string;
+  province?: string;
+  city?: string;
+  locationText?: string;
+  address?: string;
+  longitude?: string;
+  latitude?: string;
+  phone?: string;
+  email?: string;
+  roomCount?: string;
+  seatCount?: string;
+  seatBucket?: string;
+  scene?: string;
+  venueType?: string;
+  coverImage?: string;
+  status?: string;
+  recommended?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  sort?: Array<string>;
 }
 export interface VenuesPageQuery extends VenuesQuery, PageQuery {}
 
-/** @desc 查询考点列表 */
+// 查询考点列表
 export function listVenues(query: VenuesPageQuery) {
   return http.get<PageRes<VenuesResp[]>>(BASE_URL, query);
 }
 
-/** @desc 查询考点详情 */
+// 查询考点详情
 export function getVenues(id: string) {
-  return http.get<VenuesDetailResp>(`${BASE_URL}/${id}`);
+  return http.get<VenuesDetailResp>(`${BASE_URL}/info/${id}`);
 }
 
-/** @desc 新增考点 */
-export function addVenues(data: any) {
+// 新增考点
+export function addVenues(data: VenueSaveReq) {
   return http.post(BASE_URL, data);
 }
 
-/** @desc 修改考点 */
-export function updateVenues(data: any, id: string) {
+// 修改考点
+export function updateVenues(data: VenueSaveReq, id: string) {
   return http.put(`${BASE_URL}/${id}`, data);
 }
 
-/** @desc 删除考点 */
+// 删除考点
 export function deleteVenues(id: string) {
   return http.del(BASE_URL, { ids: [id] });
 }
 
-/** @desc 导出考点 */
+// 导出考点
 export function exportVenues(query: VenuesQuery) {
   return http.download(`${BASE_URL}/export`, query);
 }
 
-/** @desc 查询考点字典 */
+// 查询考点字典
 export function listVenuesDict(query?: VenuesQuery) {
   return http.get<LabelValueState[]>(`${BASE_URL}/dict`, query);
 }

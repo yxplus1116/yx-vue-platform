@@ -19,7 +19,9 @@ pnpm dev
 
 开发环境可在 `.env.development` 中配置：
 
+- `VITE_BASE`: 项目部署基础路径，默认使用 `/`
 - `VITE_API_PREFIX`: 接口基础前缀，开发环境建议 `/dev-api`
+- `VITE_API_BASE_URL`: 直连后端时使用的接口基础地址
 - `VITE_API_PROXY_TARGET`: 本地开发代理目标地址
 - `VITE_CLIENT_ID`: 统一认证中心客户端 ID
 - `VITE_TOKEN_STORAGE_KEY`: 本地 token 存储键名
@@ -333,6 +335,7 @@ src/views/venues/
 - 优先解释作用、边界和业务原因，不解释一眼能看懂的语法
 - 关键函数要有用途说明
 - 关键状态变量要说明它是干什么的
+- TS 的 `interface`、`type`、类型字段也要写清楚用途
 - 业务联动、默认值、缓存策略、权限控制这些地方必须写注释
 - 不要滥用长篇注释，尽量一两行说清楚
 

@@ -25,7 +25,7 @@
 .auth-layout {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(360px, 460px);
+  grid-template-columns: minmax(0, 1.15fr) minmax(360px, 580px);
   background:
     radial-gradient(circle at top left, rgba(25, 118, 210, 0.12), transparent 28%),
     linear-gradient(135deg, #eff6ff 0%, #f8fafc 100%);
@@ -60,7 +60,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 20px 48px;
   background: rgba(255, 255, 255, 0.82);
   backdrop-filter: blur(16px);
 }

@@ -9,7 +9,7 @@ import { useHomeVenuePage } from './hooks/useHomeVenuePage'
 const {
   filters,
   pagination,
-  recommendItems,
+  recommendCardItems,
   loading,
   categoryItems,
   filterGroups,
@@ -39,7 +39,7 @@ onMounted(() => {
     <div class="page-shell home-page__body">
       <HomeFilterBar :items="filterGroups" :model-value="selectedFilterValues" @change="handleFilterChange" />
       <HomeRecommendSection
-        :items="recommendItems"
+        :items="recommendCardItems"
         :loading="loading"
         :current="pagination.current"
         :page-size="pagination.pageSize"

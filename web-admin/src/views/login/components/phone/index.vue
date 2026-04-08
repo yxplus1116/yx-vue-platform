@@ -1,13 +1,6 @@
 <template>
-  <a-form
-    ref="formRef"
-    :model="form"
-    :rules="rules"
-    :label-col-style="{ display: 'none' }"
-    :wrapper-col-style="{ flex: 1 }"
-    size="large"
-    @submit="handleLogin"
-  >
+  <a-form ref="formRef" :model="form" :rules="rules" :label-col-style="{ display: 'none' }"
+    :wrapper-col-style="{ flex: 1 }" size="large" @submit="handleLogin">
     <a-form-item v-if="tenantStore.needInputTenantCode" field="tenantCode" hide-label>
       <a-input v-model="tenantCode" placeholder="请输入租户编码（不输入时为默认租户）" allow-clear />
     </a-form-item>
@@ -16,13 +9,8 @@
     </a-form-item>
     <a-form-item field="captcha" hide-label>
       <a-input v-model="form.captcha" placeholder="请输入验证码" :max-length="6" allow-clear style="flex: 1 1" />
-      <a-button
-        class="captcha-btn"
-        :loading="captchaLoading"
-        :disabled="captchaDisable"
-        size="large"
-        @click="onCaptcha"
-      >
+      <a-button class="captcha-btn" :loading="captchaLoading" :disabled="captchaDisable" size="large"
+        @click="onCaptcha">
         {{ captchaBtnName }}
       </a-button>
     </a-form-item>
@@ -31,13 +19,8 @@
         <a-button class="btn" type="primary" :loading="loading" html-type="submit" size="large" long>立即登录</a-button>
       </a-space>
     </a-form-item>
-    <Verify
-      ref="VerifyRef"
-      :captcha-type="captchaType"
-      :mode="captchaMode"
-      :img-size="{ width: '330px', height: '155px' }"
-      @success="getCaptcha"
-    />
+    <Verify ref="VerifyRef" :captcha-type="captchaType" :mode="captchaMode"
+      :img-size="{ width: '330px', height: '155px' }" @success="getCaptcha" />
   </a-form>
 </template>
 
@@ -134,7 +117,7 @@ const getCaptcha = async (captchaReq: BehaviorCaptchaReq) => {
     captchaDisable.value = true
     captchaBtnName.value = `获取验证码(${(captchaTime.value -= 1)}s)`
     // Message.success('短信发送成功')
-    Message.success('仅提供效果演示，实际使用请查看代码取消相关注释')
+    // Message.success('仅提供效果演示，实际使用请查看代码取消相关注释')
     captchaTimer.value = window.setInterval(() => {
       captchaTime.value -= 1
       captchaBtnName.value = `获取验证码(${captchaTime.value}s)`
@@ -162,6 +145,7 @@ const getCaptcha = async (captchaReq: BehaviorCaptchaReq) => {
   background-color: rgb(var(--danger-1));
   border-color: rgb(var(--danger-3));
 }
+
 .arco-input-wrapper.arco-input-error:hover {
   background-color: rgb(var(--danger-1));
   border-color: rgb(var(--danger-6));
@@ -171,6 +155,7 @@ const getCaptcha = async (captchaReq: BehaviorCaptchaReq) => {
   font-size: 13px;
   color: var(--color-text-1);
 }
+
 .arco-input-wrapper:hover {
   border-color: rgb(var(--arcoblue-6));
 }

@@ -5,23 +5,19 @@
 <template>
   <div class="layout-mix">
     <!-- 左侧菜单区域 -->
-    <section
-      v-if="isDesktop" class="layout-mix-left" :class="{ 'app-menu-dark': appStore.menuDark }"
-      :style="appStore.menuDark ? appStore.themeCSSVar : undefined"
-    >
+    <section v-if="isDesktop" class="layout-mix-left" :class="{ 'app-menu-dark': appStore.menuDark }"
+      :style="appStore.menuDark ? appStore.themeCSSVar : undefined">
       <Logo :collapsed="appStore.menuCollapse" />
       <Menu :menus="twoLevelMenus" :menu-style="{ flex: 1 }" />
-      <WwAds class="ads" />
+      <!-- <WwAds class="ads" /> -->
     </section>
 
     <!-- 右侧内容区域 -->
     <section class="layout-mix-right">
       <header class="header">
         <MenuFoldBtn />
-        <a-menu
-          v-if="isDesktop" mode="horizontal" :selected-keys="activeMenu" :auto-open-selected="false"
-          :trigger-props="menuTriggerProps" @menu-item-click="handleMenuItemClickByPath"
-        >
+        <a-menu v-if="isDesktop" mode="horizontal" :selected-keys="activeMenu" :auto-open-selected="false"
+          :trigger-props="menuTriggerProps" @menu-item-click="handleMenuItemClickByPath">
           <a-menu-item v-for="item in oneLevelMenus" :key="item.path">
             <template #icon>
               <GiSvgIcon :name="getMenuIcon(item) || ''" :size="24" />

@@ -9,7 +9,7 @@
           <PasswordPolicy />
         </div>
         <div style="margin-top: 16px">
-          <RightBox />
+          <!-- <RightBox /> -->
         </div>
       </a-col>
     </a-row>

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
+import AppLoading from '@/components/loading/AppLoading.vue'
 import VenueMap from '@/components/map/VenueMap.vue'
+import AppTextCopy from '@/components/text-copy/AppTextCopy.vue'
 import emailIcon from '@/assets/image/venue-email.png'
 import phoneIcon from '@/assets/image/venue-phone.png'
 import { useVenueDetail } from './hooks/useVenueDetail'
@@ -25,7 +27,13 @@ onMounted(() => {
 </script>
 
 <template>
-  <a-spin v-if="loading" class="venue-detail__loading" :loading="loading" tip="考点信息加载中..." />
+  <AppLoading
+    v-if="loading"
+    class="venue-detail__loading"
+    tip="考点信息加载中..."
+    :min-height="420"
+    background="#ffffff"
+  />
 
   <div v-else-if="venue" class="venue-detail page-shell">
     <section class="venue-detail__hero">
@@ -93,14 +101,24 @@ onMounted(() => {
           <img class="venue-detail__contact-icon" :src="phoneIcon" alt="" />
           <div class="venue-detail__contact-content">
             <label>联系电话</label>
-            <span>{{ venue.phone || '--' }}</span>
+            <AppTextCopy
+              :content="venue.phone"
+              empty-text="--"
+              success-text="联系电话已复制"
+              tooltip="复制电话"
+            />
           </div>
         </article>
         <article class="venue-detail__contact-card">
           <img class="venue-detail__contact-icon" :src="emailIcon" alt="" />
           <div class="venue-detail__contact-content">
             <label>联系邮箱</label>
-            <span>{{ venue.email || '--' }}</span>
+            <AppTextCopy
+              :content="venue.email"
+              empty-text="--"
+              success-text="联系邮箱已复制"
+              tooltip="复制邮箱"
+            />
           </div>
         </article>
       </div>
@@ -202,13 +220,37 @@ onMounted(() => {
   &__thumbs {
     display: flex;
     flex-direction: column;
+    align-items: stretch;
     gap: 8px;
+    height: 360px;
+    min-width: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+
+    // 图集较多时保持预览区高度稳定
+    scrollbar-width: thin;
+    scrollbar-color: rgba(148, 163, 184, 0.7) transparent;
+
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.72);
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
   }
 
   &__thumb {
     overflow: hidden;
-    width: 96px;
-    height: 82px;
+    flex: 0 0 82px;
+    width: 100%;
+    min-height: 82px;
     padding: 0;
     border: 1px solid rgba(203, 213, 225, 0.95);
     border-radius: 8px;
@@ -364,16 +406,10 @@ onMounted(() => {
       color: #64748b;
       font-size: 13px;
     }
-
-    span {
-      color: #0f172a;
-      font-size: 16px;
-      font-weight: 600;
-    }
   }
 
   &__loading {
-    min-height: 320px;
+    margin-top: 12px;
   }
 
   &__empty {
@@ -393,11 +429,16 @@ onMounted(() => {
 
     &__thumbs {
       flex-direction: row;
+      max-height: none;
+      height: auto;
       overflow-x: auto;
+      overflow-y: hidden;
     }
 
     &__thumb {
       flex: 0 0 96px;
+      width: 96px;
+      min-height: 82px;
     }
 
     &__contacts {

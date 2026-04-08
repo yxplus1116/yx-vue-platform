@@ -12,82 +12,39 @@ import { getVenues, addVenues, updateVenues } from '@/apis/business/venues'
 import { type ColumnItem, GiForm } from '@/components/GiForm'
 import { useResetReactive } from '@/hooks'
 import { useDict } from '@/hooks/app'
+import type { VenueFormData } from './types'
+import { buildVenueFormData, buildVenueSavePayload, createDefaultVenueForm } from './utils'
 
 const emit = defineEmits<{
   (e: 'save-success'): void
 }>()
 
+// 弹窗宽度跟着窗口尺寸联动
 const { width } = useWindowSize()
 
+// 当前编辑的数据 id，没有值时表示新增
 const dataId = ref('')
+
+// 弹窗显隐状态
 const visible = ref(false)
+
+// 当前弹窗是不是编辑模式
 const isUpdate = computed(() => !!dataId.value)
+
+// 弹窗标题会跟着新增和修改模式切换
 const title = computed(() => (isUpdate.value ? '修改考点' : '新增考点'))
+
+// 表单实例，用来触发校验和重置
 const formRef = ref<InstanceType<typeof GiForm>>()
+
+// 三类字典选项，表单和回显都会复用
 const { venueType, seatCount, scene } = useDict('venueType', 'seatCount', 'scene')
 
-/** 考点表单中的地区值。 */
-interface VenueRegionValue {
-  /** 当前选中的省份名称。 */
-  province: string
-  /** 当前选中的城市名称。 */
-  city: string
-  /** 当前选中的省份编码。 */
-  provinceCode?: string
-  /** 当前选中的城市编码。 */
-  cityCode?: string
-}
+// 表单层只让应用场景保持数组模型，提交前再转回字符串
+const [form, resetForm] = useResetReactive<VenueFormData>(createDefaultVenueForm)
 
-/** 考点表单中的地图选点值。 */
-interface VenueLocationValue {
-  /** 详细地址。 */
-  address: string
-  /** 经度。 */
-  longitude: string
-  /** 纬度。 */
-  latitude: string
-  /** 地点名称。 */
-  name?: string
-}
-
-const [form, resetForm] = useResetReactive({
-  title: '',
-  summary: '',
-  description: '',
-  region: {
-    province: '',
-    city: '',
-    provinceCode: '',
-    cityCode: '',
-  } as VenueRegionValue,
-  locationPicker: {
-    address: '',
-    longitude: '',
-    latitude: '',
-    name: '',
-  } as VenueLocationValue,
-  province: '',
-  city: '',
-  locationText: '',
-  address: '',
-  longitude: '',
-  latitude: '',
-  phone: '',
-  email: '',
-  roomCount: undefined,
-  seatCount: undefined,
-  seatBucket: undefined,
-  scene: undefined,
-  venueType: undefined,
-  tags: '',
-  coverImage: '',
-  gallery: '',
-  status: 1,
-  isRecommended: 0,
-  sort: 0,
-})
-
-const columns: ColumnItem[] = reactive([
+// 表单列配置统一放这里，避免模板里散落业务字段定义
+const columns: ColumnItem<VenueFormData>[] = reactive([
   {
     label: '基础信息',
     field: 'basicInfoTitle',
@@ -145,12 +102,13 @@ const columns: ColumnItem[] = reactive([
   },
   {
     label: '应用场景',
-    field: 'scene',
+    field: 'sceneValues',
     type: 'select',
     span: 6,
     required: true,
     props: {
       options: scene,
+      multiple: true,
     },
   },
   {
@@ -332,7 +290,7 @@ const columns: ColumnItem[] = reactive([
     props: {
       listType: 'picture-card',
       multiple: true,
-      limit: 9,
+      limit: 20,
       valueType: 'csv',
       parentPath: '/venues/gallery',
     },
@@ -355,7 +313,7 @@ const columns: ColumnItem[] = reactive([
   },
   {
     label: '是否推荐',
-    field: 'isRecommended',
+    field: 'recommended',
     type: 'switch',
     span: 12,
     props: {
@@ -378,24 +336,20 @@ const columns: ColumnItem[] = reactive([
   },
 ])
 
-// 重置
+// 关闭或切换模式前，把表单恢复到初始状态
 const reset = () => {
   formRef.value?.formRef?.resetFields()
   resetForm()
 }
 
-// 保存
+// 保存时统一把数组字段转回接口要求的逗号字符串
 const save = async () => {
   try {
     const isInvalid = await formRef.value?.formRef?.validate()
     if (isInvalid) return false
-    const payload = {
-      ...form,
-      province: form.region?.province || form.province,
-      city: form.region?.city || form.city,
-    }
-    delete payload.region
-    delete payload.locationPicker
+
+    const payload = buildVenueSavePayload(form)
+
     if (isUpdate.value) {
       await updateVenues(payload, dataId.value)
       Message.success('修改成功')
@@ -410,31 +364,19 @@ const save = async () => {
   }
 }
 
-// 新增
+// 打开新增弹窗
 const onAdd = async () => {
   reset()
   dataId.value = ''
   visible.value = true
 }
 
-// 修改
+// 打开编辑弹窗，并把接口字符串字段回填成数组
 const onUpdate = async (id: string) => {
   reset()
   dataId.value = id
   const { data } = await getVenues(id)
-  Object.assign(form, data)
-  form.region = {
-    province: data.province || '',
-    city: data.city || '',
-    provinceCode: '',
-    cityCode: '',
-  }
-  form.locationPicker = {
-    address: data.address || '',
-    longitude: data.longitude || '',
-    latitude: data.latitude || '',
-    name: '',
-  }
+  Object.assign(form, buildVenueFormData(data))
   visible.value = true
 }
 

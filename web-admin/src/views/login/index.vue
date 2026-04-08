@@ -24,7 +24,7 @@
               <component :is="PhoneLogin" v-if="activeTab === '2'" />
             </a-tab-pane>
           </a-tabs>
-          <div class="login-right__oauth">
+          <!-- <div class="login-right__oauth">
             <a-divider orientation="center">其他登录方式</a-divider>
             <div class="list">
               <div v-if="isEmailLogin" class="mode item" @click="toggleLoginMode"><icon-user /> 账号/手机号登录</div>
@@ -39,18 +39,19 @@
                 <GiSvgIcon name="wechat" :size="24" />
               </a>
             </div>
-          </div>
+          </div> -->
         </div>
       </a-col>
     </a-row>
 
     <div v-if="isDesktop" class="footer">
       <div class="beian">
-        <div class="below text">{{ appStore.getCopyright() }}{{ appStore.getForRecord() ? ` · ${appStore.getForRecord()}` : '' }}</div>
+        <div class="below text">{{ appStore.getCopyright() }}{{ appStore.getForRecord() ? ` ·
+          ${appStore.getForRecord()}` : '' }}</div>
       </div>
     </div>
 
-    <GiThemeBtn class="theme-btn" />
+    <!-- <GiThemeBtn class="theme-btn" /> -->
     <Background />
   </div>
 

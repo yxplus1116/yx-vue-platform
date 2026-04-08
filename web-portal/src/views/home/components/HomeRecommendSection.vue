@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import type { VenueItem } from '@/apis/venues'
-import { resolveVenueAssetUrl, splitVenueText } from '@/business/venues'
+import { resolveVenueAssetUrl } from '@/business/venues'
+import type { HomeVenueCardItem } from '../types'
 
 const router = useRouter()
 
 const props = withDefaults(defineProps<{
-  items: VenueItem[]
+  items: HomeVenueCardItem[]
   loading?: boolean
   current: number
   pageSize: number
@@ -19,20 +19,21 @@ const emit = defineEmits<{
   (e: 'page-change', page: number): void
 }>()
 
+// 详情页改成新窗口打开，用户看完还能保留当前首页筛选和滚动位置
 const openVenueDetail = (id: string) => {
-  router.push({
+  const detailRoute = router.resolve({
     name: 'venue-detail',
     params: { id },
   })
-}
 
-const getTagList = (tags: string) => splitVenueText(tags)
+  window.open(detailRoute.href, '_blank', 'noopener,noreferrer')
+}
 </script>
 
 <template>
   <section class="home-recommend">
     <div class="home-recommend__head">
-      <h2>全部启用考点</h2>
+      <h2>优质考点推荐</h2>
     </div>
 
     <div class="home-recommend__grid">
@@ -44,42 +45,26 @@ const getTagList = (tags: string) => splitVenueText(tags)
         </a-card>
       </template>
 
-      <a-empty
-        v-else-if="!props.items.length"
-        class="home-recommend__empty"
-        description="当前筛选条件下暂无考点"
-      />
+      <a-empty v-else-if="!props.items.length" class="home-recommend__empty" description="当前筛选条件下暂无考点" />
 
-      <article
-        v-else
-        v-for="item in props.items"
-        :key="item.id"
-        class="home-recommend__card"
-        role="link"
-        tabindex="0"
-        @click="openVenueDetail(item.id)"
-        @keydown.enter="openVenueDetail(item.id)"
-      >
+      <article v-else v-for="item in props.items" :key="item.id" class="home-recommend__card" role="link" tabindex="0"
+        @click="openVenueDetail(item.id)" @keydown.enter="openVenueDetail(item.id)">
         <div class="home-recommend__top">
           <div class="home-recommend__title-group">
             <div class="home-recommend__title-line">
               <h3>{{ item.title }}</h3>
-              <span v-if="Number(item.isRecommended) === 1" class="home-recommend__badge">推荐</span>
+              <span v-if="Number(item.recommended) === 1" class="home-recommend__badge">推荐</span>
             </div>
             <p>{{ item.locationText || item.address || '--' }}</p>
           </div>
         </div>
 
-        <div v-if="getTagList(item.tags).length" class="home-recommend__tags">
-          <span v-for="tag in getTagList(item.tags)" :key="tag">{{ tag }}</span>
+        <div v-if="item.displayTags.length" class="home-recommend__tags">
+          <span v-for="tag in item.displayTags" :key="tag">{{ tag }}</span>
         </div>
 
         <div class="home-recommend__image" aria-hidden="true">
-          <img
-            v-if="item.coverImage"
-            :src="resolveVenueAssetUrl(item.coverImage)"
-            :alt="item.title"
-          />
+          <img v-if="item.coverImage" :src="resolveVenueAssetUrl(item.coverImage)" :alt="item.title" />
           <div v-else class="home-recommend__image-empty">暂无封面</div>
         </div>
 
@@ -93,12 +78,8 @@ const getTagList = (tags: string) => splitVenueText(tags)
     </div>
 
     <div v-if="props.total > props.pageSize" class="home-recommend__pagination">
-      <a-pagination
-        :total="props.total"
-        :page-size="props.pageSize"
-        :current="props.current"
-        @change="emit('page-change', $event)"
-      />
+      <a-pagination :total="props.total" :page-size="props.pageSize" :current="props.current"
+        @change="emit('page-change', $event)" />
     </div>
   </section>
 </template>
@@ -297,6 +278,7 @@ const getTagList = (tags: string) => splitVenueText(tags)
     font-size: 13px;
     line-height: 1.75;
     word-break: break-word;
+    margin-bottom: auto;
   }
 
   &__bottom {
@@ -310,7 +292,7 @@ const getTagList = (tags: string) => splitVenueText(tags)
 
     strong {
       margin-left: 4px;
-      color: #0f172a;
+      color: #317AF7;
       font-size: 18px;
     }
 

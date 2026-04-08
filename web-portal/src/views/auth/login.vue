@@ -5,6 +5,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { getImageCaptcha } from '@/apis'
 import { useAuthStore } from '@/stores'
 import { encryptByRsa } from '@/utils/encrypt'
+import AuthPanelCard from './components/AuthPanelCard.vue'
 
 interface CaptchaState {
   uuid: string
@@ -123,20 +124,11 @@ onMounted(() => {
 </script>
 
 <template>
-  <a-card class="auth-card" :bordered="false">
-    <template #title>
-      <div class="auth-card__title">
-        <div class="auth-card__title-copy">
-          <h2>登录账号</h2>
-          <p>门户端已对齐后台统一认证中心，请使用同一套账号体系登录。</p>
-        </div>
-      </div>
-    </template>
-
+  <AuthPanelCard title="登录账号" description="" footer-tip="登录即表示你同意全国考点平台服务协议与隐私政策">
     <a-form :model="form" layout="vertical" size="large">
-      <a-form-item field="tenantCode" label="租户编码">
+      <!-- <a-form-item field="tenantCode" label="租户编码">
         <a-input v-model="tenantCode" placeholder="多租户场景可填写租户编码，单租户可留空" allow-clear />
-      </a-form-item>
+      </a-form-item> -->
       <a-form-item field="username" label="账号">
         <a-input v-model="form.username" placeholder="请输入手机号 / 用户名" allow-clear />
       </a-form-item>
@@ -146,12 +138,7 @@ onMounted(() => {
       <a-form-item v-if="captcha.enabled" field="captcha" label="验证码">
         <div class="auth-card__captcha">
           <a-input v-model="form.captcha" placeholder="请输入验证码" allow-clear />
-          <button
-            class="auth-card__captcha-trigger"
-            type="button"
-            :disabled="captchaLoading"
-            @click="refreshCaptcha"
-          >
+          <button class="auth-card__captcha-trigger" type="button" :disabled="captchaLoading" @click="refreshCaptcha">
             <img v-if="captcha.image" :src="captcha.image" alt="验证码" />
             <span v-else>{{ captchaLoading ? '加载中...' : '点击刷新' }}</span>
           </button>
@@ -168,48 +155,10 @@ onMounted(() => {
         <a-button long class="auth-card__ghost" @click="$router.push('/auth/register')">注册</a-button>
       </a-form-item>
     </a-form>
-
-    <div class="auth-card__tips">
-      <span>登录即表示你同意全国考点平台服务协议与隐私政策</span>
-    </div>
-  </a-card>
+  </AuthPanelCard>
 </template>
 
 <style scoped lang="less">
-.auth-card {
-  width: min(100%, 420px);
-  border-radius: 18px;
-  border: 1px solid rgba(15, 35, 95, 0.08);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(246, 250, 255, 0.94));
-  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.1);
-
-  :deep(.arco-card-header) {
-    height: auto;
-    min-height: unset;
-    align-items: flex-start;
-  }
-}
-
-.auth-card__title-copy {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.auth-card__title h2 {
-  margin: 0;
-  color: #102a43;
-  font-size: 26px;
-}
-
-.auth-card__title p {
-  margin: 0;
-  color: #6b7c93;
-  line-height: 1.7;
-  font-size: 14px;
-}
-
 .auth-card__captcha {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 124px;
@@ -277,27 +226,7 @@ onMounted(() => {
   width: 100%;
 }
 
-.auth-card__tips {
-  margin-top: 4px;
-  color: #97a6ba;
-  font-size: 12px;
-  line-height: 1.6;
-}
-
 @media (max-width: 480px) {
-  .auth-card {
-    width: 100%;
-    border-radius: 14px;
-  }
-
-  .auth-card__title h2 {
-    font-size: 22px;
-  }
-
-  .auth-card__title p {
-    font-size: 13px;
-  }
-
   .auth-card__captcha {
     grid-template-columns: 1fr;
   }

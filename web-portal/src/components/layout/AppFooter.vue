@@ -18,7 +18,7 @@ const authed = computed(() => authStore.isAuthenticated)
     <section class="footer__hero" :style="footerHeroStyle">
       <div class="page-shell footer__hero-inner">
         <h2>全国考点平台 - 聚合考点资源, 助力高效对接</h2>
-        <p>2 分钟发布您的考点, 马上对接全国需求, 快来注册吧</p>
+        <p>2 分钟发布您的考点, 马上对接全国需求, 快来使用吧</p>
         <a-button type="primary" class="footer__register" @click="$router.push(authed ? '/' : '/auth/register')">
           {{ authed ? '进入平台' : '立即注册' }}
         </a-button>
@@ -27,9 +27,10 @@ const authed = computed(() => authStore.isAuthenticated)
 
     <section class="footer__copyright">
       <div class="page-shell footer__copyright-inner">
-        <span>&copy;2025 全国考点平台</span>
-        <span>京ICP备17011335号</span>
-        <RouterLink to="/solutions">关于我们</RouterLink>
+        <span>&copy;2026 全国考点平台</span>
+        <a href="https://beian.miit.gov.cn/#/Integrated/index" target="_blank">ICP备16000262号-2</a>
+        <span>京公网安备 11010802018462</span>
+        <a href="https://www.gggrp.com/aboutus" target="_blank">关于我们</a>
       </div>
     </section>
   </footer>

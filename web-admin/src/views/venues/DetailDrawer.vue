@@ -10,15 +10,15 @@
             </a-tag>
           </a-descriptions-item>
           <a-descriptions-item label="推荐状态">
-            <a-tag :color="Number(dataDetail?.isRecommended) === 1 ? 'arcoblue' : 'gray'">
-              {{ Number(dataDetail?.isRecommended) === 1 ? '推荐' : '普通' }}
+            <a-tag :color="Number(dataDetail?.recommended) === 1 ? 'arcoblue' : 'gray'">
+              {{ Number(dataDetail?.recommended) === 1 ? '推荐' : '普通' }}
             </a-tag>
           </a-descriptions-item>
           <a-descriptions-item label="考点类型">
             <GiCellTag :value="dataDetail?.venueType" :dict="venueType" />
           </a-descriptions-item>
           <a-descriptions-item label="应用场景">
-            <GiCellTag :value="dataDetail?.scene" :dict="scene" />
+            <GiCellTags :data="getSceneLabels(dataDetail?.scene)" />
           </a-descriptions-item>
           <a-descriptions-item label="考位区间">
             <GiCellTag :value="dataDetail?.seatBucket" :dict="seatCount" />
@@ -26,7 +26,10 @@
           <a-descriptions-item label="考场数量">{{ dataDetail?.roomCount || 0 }} 间</a-descriptions-item>
           <a-descriptions-item label="考位数量">{{ dataDetail?.seatCount || 0 }} 个</a-descriptions-item>
           <a-descriptions-item label="排序值">{{ dataDetail?.sort ?? '--' }}</a-descriptions-item>
-          <a-descriptions-item label="标签">{{ dataDetail?.tags || '--' }}</a-descriptions-item>
+          <a-descriptions-item label="标签">
+            <GiCellTags v-if="customTags.length" :data="customTags" />
+            <span v-else>-</span>
+          </a-descriptions-item>
           <a-descriptions-item label="首页摘要" :span="2">{{ dataDetail?.summary || '--' }}</a-descriptions-item>
           <a-descriptions-item label="详情介绍" :span="2">
             <div v-if="dataDetail?.description" class="venue-rich-text" v-html="dataDetail.description"></div>
@@ -52,18 +55,10 @@
       <a-card title="图片资源" :bordered="false">
         <a-descriptions :column="1" size="large" class="general-description">
           <a-descriptions-item label="封面图">
-            <div v-if="resolvedCoverImage" class="venue-image">
-              <img :src="resolvedCoverImage" :alt="dataDetail?.title" />
-            </div>
-            <span v-else>--</span>
+            <GiImagePreview :src="resolvedCoverImage" :alt="dataDetail?.title || '考点封面图'" :width="160" :height="100" />
           </a-descriptions-item>
           <a-descriptions-item label="图集">
-            <div v-if="galleryImages.length" class="venue-gallery">
-              <div v-for="image in galleryImages" :key="image" class="venue-gallery__item">
-                <img :src="image" alt="考点图集" />
-              </div>
-            </div>
-            <span v-else>--</span>
+            <GiImagePreview :images="galleryImages" alt="考点图集" :width="120" :height="80" />
           </a-descriptions-item>
         </a-descriptions>
       </a-card>
@@ -86,58 +81,46 @@
 <script setup lang="ts">
 import { useWindowSize } from '@vueuse/core'
 import { type VenuesDetailResp, getVenues as getDetail } from '@/apis/business/venues'
+import GiImagePreview from '@/components/GiImagePreview'
 import { useDict } from '@/hooks/app'
-import { isHttp } from '@/utils/validate'
+import { getVenueGalleryImages, mapVenueDictTags, resolveVenueImageUrl, splitVenueCsvValue } from './utils'
 
+// 三类字典既用于标签回显，也用于详情展示
 const { venueType, seatCount, scene } = useDict('venueType', 'seatCount', 'scene')
 
+// 抽屉宽度跟着窗口尺寸变化
 const { width } = useWindowSize()
 
+// 当前查看的考点 id
 const dataId = ref('')
+
+// 当前抽屉详情数据
 const dataDetail = ref<VenuesDetailResp>()
+
+// 抽屉显隐状态
 const visible = ref(false)
 
-/** 将图片地址统一转换为前端可访问的完整地址。 */
-function resolveImageUrl(url?: string) {
-  if (!url) {
-    return ''
-  }
-
-  if (isHttp(url)) {
-    return url
-  }
-
-  const baseUrl = import.meta.env.VITE_API_BASE_URL || ''
-  if (!baseUrl) {
-    return url
-  }
-
-  return `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`
+// 应用场景详情回显
+function getSceneLabels(value?: string) {
+  return mapVenueDictTags(value, scene.value || [])
 }
 
-/** 当前封面图的展示地址。 */
-const resolvedCoverImage = computed(() => resolveImageUrl(dataDetail.value?.coverImage))
+// 当前封面图的展示地址
+const resolvedCoverImage = computed(() => resolveVenueImageUrl(dataDetail.value?.coverImage))
 
-/** 图集图片展示地址列表。 */
-const galleryImages = computed(() => {
-  if (!dataDetail.value?.gallery) {
-    return []
-  }
+// 图集图片展示地址列表
+const galleryImages = computed(() => getVenueGalleryImages(dataDetail.value?.gallery))
 
-  return dataDetail.value.gallery
-    .split(',')
-    .map((item) => item.trim())
-    .map((item) => resolveImageUrl(item))
-    .filter(Boolean)
-})
+// 自定义标签会按英文逗号拆成多个展示项
+const customTags = computed(() => splitVenueCsvValue(dataDetail.value?.tags))
 
-/** 查询详情。 */
+// 查询详情
 const getDataDetail = async () => {
   const { data } = await getDetail(dataId.value)
   dataDetail.value = data
 }
 
-/** 打开抽屉并拉取详情。 */
+// 打开抽屉并拉取详情
 const onOpen = async (id: string) => {
   dataId.value = id
   await getDataDetail()
@@ -148,41 +131,6 @@ defineExpose({ onOpen })
 </script>
 
 <style scoped lang="scss">
-.venue-image {
-  width: 160px;
-  height: 100px;
-  overflow: hidden;
-  border-radius: 6px;
-  border: 1px solid var(--color-border-2);
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-}
-
-.venue-gallery {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 8px;
-}
-
-.venue-gallery__item {
-  height: 80px;
-  overflow: hidden;
-  border-radius: 6px;
-  border: 1px solid var(--color-border-2);
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-}
-
 .venue-rich-text {
   line-height: 1.75;
   color: var(--color-text-2);

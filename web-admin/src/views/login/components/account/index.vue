@@ -1,13 +1,6 @@
 <template>
-  <a-form
-    ref="formRef"
-    :model="form"
-    :rules="rules"
-    :label-col-style="{ display: 'none' }"
-    :wrapper-col-style="{ flex: 1 }"
-    size="large"
-    @submit="handleLogin"
-  >
+  <a-form ref="formRef" :model="form" :rules="rules" :label-col-style="{ display: 'none' }"
+    :wrapper-col-style="{ flex: 1 }" size="large" @submit="handleLogin">
     <a-form-item v-if="tenantStore.needInputTenantCode" field="tenantCode" hide-label>
       <a-input v-model="tenantCode" placeholder="请输入租户编码（不输入时为默认租户）" allow-clear />
     </a-form-item>
@@ -49,8 +42,10 @@ import { encryptByRsa } from '@/utils/encrypt'
 
 const loginConfig = useStorage('login-config', {
   rememberMe: true,
-  username: 'admin', // 演示默认值
-  password: 'admin123', // 演示默认值
+  username: '',
+  password: ''
+  // username: 'admin', // 演示默认值
+  // password: 'admin123', // 演示默认值
   // username: debug ? 'admin' : '', // 演示默认值
   // password: debug ? 'admin123' : '', // 演示默认值
 })
